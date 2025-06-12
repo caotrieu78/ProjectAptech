@@ -92,7 +92,7 @@ php artisan serve
 - **Frontend**: Chuyển đến thư mục frontend và chạy:
 ```bash
 cd frontend
-npm start
+npm run dev
 ```
 - Truy cập:
   - Frontend: `http://localhost:3000`
