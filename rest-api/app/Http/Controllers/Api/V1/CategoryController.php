@@ -72,4 +72,14 @@ class CategoryController extends Controller
 
         return response()->json(['message' => 'Category deleted successfully']);
     }
+
+
+    public function __construct()
+    {
+        // Chỉ cho admin
+        $this->middleware('admin')->only(['store', 'update', 'destroy']);
+
+        // Cho user đã login
+        $this->middleware('auth:sanctum')->only(['index', 'show']);
+    }
 }

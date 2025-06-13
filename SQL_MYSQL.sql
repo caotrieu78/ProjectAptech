@@ -1,14 +1,14 @@
--- Tạo Database
+-- Tạo CSDL
 CREATE DATABASE IF NOT EXISTS MaverickDressesDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE MaverickDressesDB;
 
--- Bảng Roles (quyền người dùng)
+-- Bảng Roles
 CREATE TABLE Roles (
     RoleID INT AUTO_INCREMENT PRIMARY KEY,
     RoleName VARCHAR(50) NOT NULL
 );
 
--- Bảng Users (người dùng)
+-- Bảng Users (Laravel sử dụng)
 CREATE TABLE Users (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
     Username VARCHAR(100) UNIQUE NOT NULL,
@@ -18,16 +18,32 @@ CREATE TABLE Users (
     RoleID INT,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     IsActive BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
+    remember_token VARCHAR(100),
+    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE SET NULL
 );
 
--- Bảng Loại Sản Phẩm
+-- Bảng token Sanctum
+CREATE TABLE personal_access_tokens (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tokenable_type VARCHAR(255) NOT NULL,
+    tokenable_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    token VARCHAR(64) NOT NULL,
+    abilities TEXT,
+    last_used_at TIMESTAMP NULL,
+    expires_at TIMESTAMP NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    INDEX tokenable_type_id_index (tokenable_type, tokenable_id)
+);
+
+-- Bảng loại sản phẩm
 CREATE TABLE ProductCategory (
     CategoryID INT AUTO_INCREMENT PRIMARY KEY,
     CategoryName VARCHAR(100) NOT NULL
 );
 
--- Bảng Sản Phẩm (thêm giới tính và ảnh đại diện)
+-- Bảng sản phẩm
 CREATE TABLE Product (
     ProductID INT AUTO_INCREMENT PRIMARY KEY,
     ProductName VARCHAR(200) NOT NULL,
@@ -35,22 +51,22 @@ CREATE TABLE Product (
     Gender ENUM('Male', 'Female', 'Unisex'),
     CategoryID INT,
     ThumbnailURL VARCHAR(300),
-    FOREIGN KEY (CategoryID) REFERENCES ProductCategory(CategoryID)
+    FOREIGN KEY (CategoryID) REFERENCES ProductCategory(CategoryID) ON DELETE SET NULL
 );
 
--- Bảng Size (kích cỡ)
+-- Bảng Size
 CREATE TABLE Size (
     SizeID INT AUTO_INCREMENT PRIMARY KEY,
     SizeName VARCHAR(50) NOT NULL
 );
 
--- Bảng Color (màu sắc)
+-- Bảng Màu
 CREATE TABLE Color (
     ColorID INT AUTO_INCREMENT PRIMARY KEY,
     ColorName VARCHAR(50) NOT NULL
 );
 
--- Bảng biến thể sản phẩm theo size + màu
+-- Bảng biến thể sản phẩm
 CREATE TABLE ProductVariant (
     VariantID INT AUTO_INCREMENT PRIMARY KEY,
     ProductID INT,
@@ -59,12 +75,12 @@ CREATE TABLE ProductVariant (
     Price DECIMAL(10,2),
     StockQuantity INT,
     ImageURL VARCHAR(300),
-    FOREIGN KEY (ProductID) REFERENCES Product(ProductID),
-    FOREIGN KEY (SizeID) REFERENCES Size(SizeID),
-    FOREIGN KEY (ColorID) REFERENCES Color(ColorID)
+    FOREIGN KEY (ProductID) REFERENCES Product(ProductID) ON DELETE CASCADE,
+    FOREIGN KEY (SizeID) REFERENCES Size(SizeID) ON DELETE SET NULL,
+    FOREIGN KEY (ColorID) REFERENCES Color(ColorID) ON DELETE SET NULL
 );
 
--- Bảng Phản hồi người dùng
+-- Bảng phản hồi
 CREATE TABLE Feedback (
     FeedbackID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100),
@@ -73,7 +89,7 @@ CREATE TABLE Feedback (
     SubmittedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Bảng Chi nhánh
+-- Bảng chi nhánh
 CREATE TABLE Branch (
     BranchID INT AUTO_INCREMENT PRIMARY KEY,
     BranchName VARCHAR(100),
@@ -85,7 +101,7 @@ CREATE TABLE Branch (
     Email VARCHAR(100)
 );
 
--- Bảng thông tin liên hệ công ty chính
+-- Bảng thông tin liên hệ
 CREATE TABLE ContactInfo (
     ContactID INT AUTO_INCREMENT PRIMARY KEY,
     Address VARCHAR(300),
@@ -96,17 +112,39 @@ CREATE TABLE ContactInfo (
     Longitude DOUBLE
 );
 
--- Bảng ghi lại lượt truy cập
+-- ✅ Bảng log truy cập (đã thêm UserID)
 CREATE TABLE VisitorLog (
     VisitID INT AUTO_INCREMENT PRIMARY KEY,
     IPAddress VARCHAR(50),
     VisitTime DATETIME DEFAULT CURRENT_TIMESTAMP,
-    Location VARCHAR(200)
+    Location VARCHAR(200),
+    UserID INT NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE SET NULL
+)
+
+-- Bảng đơn hàng
+CREATE TABLE Orders (
+    OrderID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT,
+    OrderDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Status VARCHAR(50) DEFAULT 'Pending',
+    TotalAmount DECIMAL(10,2),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE SET NULL
 );
 
+-- Bảng chi tiết đơn hàng
+CREATE TABLE OrderDetails (
+    OrderDetailID INT AUTO_INCREMENT PRIMARY KEY,
+    OrderID INT,
+    VariantID INT,
+    Quantity INT,
+    Price DECIMAL(10,2),
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE,
+    FOREIGN KEY (VariantID) REFERENCES ProductVariant(VariantID) ON DELETE SET NULL
+);
 
-
-
+-- Dữ liệu mẫu
+INSERT INTO Roles (RoleID, RoleName) VALUES (1, 'Admin'), (2, 'User');
 
 INSERT INTO ProductCategory (CategoryName) VALUES 
 ('Váy dạ hội'),
