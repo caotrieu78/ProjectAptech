@@ -9,7 +9,8 @@ import {
     FaChartBar,
     FaComments,
     FaThLarge,
-    FaTimes
+    FaTimes,
+    FaClipboardList  // ✅ Icon đơn hàng
 } from 'react-icons/fa';
 
 const Sidebar = ({ onClose }) => (
@@ -60,7 +61,15 @@ const Sidebar = ({ onClose }) => (
             >
                 <FaThLarge /> Sản phẩm biến thể
             </NavLink>
-
+            {/* ✅ Đơn hàng */}
+            <NavLink
+                to={PATHS.ORDER_DASHBOARD}
+                className={({ isActive }) =>
+                    `nav-link d-flex align-items-center gap-2 sidebar-link ${isActive ? 'active' : ''}`
+                }
+            >
+                <FaClipboardList /> Đơn hàng
+            </NavLink>
             <NavLink
                 to={PATHS.USER_DASHBOARD}
                 className={({ isActive }) =>
@@ -78,7 +87,14 @@ const Sidebar = ({ onClose }) => (
             >
                 <FaStore /> Chi nhánh
             </NavLink>
-
+            <NavLink
+                to={PATHS.FEEDBACK_DASHBOARD}
+                className={({ isActive }) =>
+                    `nav-link d-flex align-items-center gap-2 sidebar-link ${isActive ? 'active' : ''}`
+                }
+            >
+                <FaComments /> Feedback
+            </NavLink>
             <NavLink
                 to={PATHS.REPORT_DASHBOARD}
                 className={({ isActive }) =>
@@ -88,14 +104,9 @@ const Sidebar = ({ onClose }) => (
                 <FaChartBar /> Thống kê & Báo cáo
             </NavLink>
 
-            <NavLink
-                to={PATHS.FEEDBACK_DASHBOARD}
-                className={({ isActive }) =>
-                    `nav-link d-flex align-items-center gap-2 sidebar-link ${isActive ? 'active' : ''}`
-                }
-            >
-                <FaComments /> Feedback
-            </NavLink>
+
+
+
         </nav>
     </div>
 );

@@ -12,17 +12,18 @@ class OrderController extends Controller
 {
     public function __construct()
     {
-        // ✅ Người dùng đã đăng nhập có thể tạo, xem đơn hàng của chính họ
         $this->middleware('auth:sanctum')->only(['index', 'show', 'store']);
-
-        // ✅ Admin có thể xem, sửa, xoá tất cả (tùy mở rộng sau)
-        $this->middleware('admin')->only(['destroy']);
+        $this->middleware('admin')->only(['destroy', 'adminIndex', 'update']);
     }
 
-    // ✅ Danh sách đơn hàng của user hiện tại
+    // ✅ Lấy đơn hàng của người dùng hiện tại
     public function index()
     {
-        $orders = Order::with('details.variant')
+        $orders = Order::with([
+            'details.variant.product',
+            'details.variant.size',
+            'details.variant.color',
+        ])
             ->where('UserID', auth()->id())
             ->orderByDesc('OrderDate')
             ->get();
@@ -30,10 +31,14 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    // ✅ Chi tiết đơn hàng của user hiện tại
+    // ✅ Lấy chi tiết đơn hàng của người dùng hiện tại
     public function show($id)
     {
-        $order = Order::with('details.variant')
+        $order = Order::with([
+            'details.variant.product',
+            'details.variant.size',
+            'details.variant.color',
+        ])
             ->where('UserID', auth()->id())
             ->find($id);
 
@@ -44,7 +49,7 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    // ✅ Đặt đơn hàng mới (user login)
+    // ✅ Tạo đơn hàng mới
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -83,6 +88,7 @@ class OrderController extends Controller
             }
 
             DB::commit();
+
             return response()->json([
                 'message' => 'Đặt hàng thành công',
                 'order' => $order->load('details.variant')
@@ -93,6 +99,67 @@ class OrderController extends Controller
                 'error' => 'Không thể đặt hàng',
                 'detail' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    // ✅ Admin: Lấy tất cả đơn hàng kèm quan hệ đầy đủ
+    public function adminIndex()
+    {
+        $orders = Order::with([
+            'details.variant.product',
+            'details.variant.size',
+            'details.variant.color',
+            'user'
+        ])
+            ->orderByDesc('OrderDate')
+            ->get();
+
+        return response()->json($orders);
+    }
+
+    // ✅ Admin: Cập nhật đơn hàng
+    public function update(Request $request, $id)
+    {
+        $order = Order::find($id);
+
+        if (!$order) {
+            return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
+        }
+
+        $validated = $request->validate([
+            'Status' => 'sometimes|string|max:50',
+            'TotalAmount' => 'sometimes|numeric',
+            'PaymentStatus' => 'nullable|string|max:50',
+            'PaymentMethod' => 'nullable|string|max:50',
+        ]);
+
+        $order->update($validated);
+
+        return response()->json([
+            'message' => 'Cập nhật đơn hàng thành công',
+            'order' => $order->fresh()
+        ]);
+    }
+
+    // ✅ Admin: Xoá đơn hàng
+    public function destroy($id)
+    {
+        $order = Order::find($id);
+
+        if (!$order) {
+            return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            OrderDetail::where('OrderID', $id)->delete();
+            $order->delete();
+
+            DB::commit();
+            return response()->json(['message' => 'Đã xoá đơn hàng']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Lỗi khi xoá đơn hàng', 'detail' => $e->getMessage()], 500);
         }
     }
 }

@@ -11,12 +11,27 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "aos": "^2.3.4",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
+    "classnames": "^2.5.1",
+    "isotope-layout": "^3.0.6",
+    "jquery": "^3.7.1",
+    "magnific-popup": "^1.2.0",
+    "perfect-scrollbar": "^1.5.6",
     "react": "^19.1.0",
+    "react-bootstrap": "^2.10.10",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.6.2"
+    "react-modal": "^3.16.3",
+    "react-perfect-scrollbar": "^1.5.8",
+    "react-router-dom": "^7.6.2",
+    "react-select": "^5.10.1",
+    "react-slick": "^0.30.3",
+    "recharts": "^2.15.3",
+    "select2": "^4.1.0-rc.0",
+    "slick-carousel": "^1.8.1",
+    "sweetalert2": "^11.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

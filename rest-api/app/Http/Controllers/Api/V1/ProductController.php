@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -29,8 +31,15 @@ class ProductController extends Controller
             'Description' => 'nullable|string|max:500',
             'Gender' => 'required|in:Male,Female,Unisex',
             'CategoryID' => 'required|exists:ProductCategory,CategoryID',
-            'ThumbnailURL' => 'nullable|url|max:300',
+            'Thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // ✅ ảnh
         ]);
+
+        if ($request->hasFile('Thumbnail')) {
+            $image = $request->file('Thumbnail');
+            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images/product'), $filename);
+            $validated['ThumbnailURL'] = url('images/product/' . $filename);
+        }
 
         $product = Product::create($validated);
         return response()->json($product, 201);
@@ -48,8 +57,24 @@ class ProductController extends Controller
             'Description' => 'nullable|string|max:500',
             'Gender' => 'in:Male,Female,Unisex',
             'CategoryID' => 'exists:ProductCategory,CategoryID',
-            'ThumbnailURL' => 'nullable|url|max:300',
+            'Thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
+
+        // Xử lý ảnh mới nếu có
+        if ($request->hasFile('Thumbnail')) {
+            // Xoá ảnh cũ nếu tồn tại
+            if ($product->ThumbnailURL) {
+                $oldPath = public_path(parse_url($product->ThumbnailURL, PHP_URL_PATH));
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
+            }
+
+            $image = $request->file('Thumbnail');
+            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images/product'), $filename);
+            $validated['ThumbnailURL'] = url('images/product/' . $filename);
+        }
 
         $product->update($validated);
         return response()->json($product);

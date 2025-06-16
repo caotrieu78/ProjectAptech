@@ -10,10 +10,9 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-    protected $table = 'Users'; // tên bảng đúng theo CSDL
-    protected $primaryKey = 'UserID'; // tên khóa chính
-
-    public $timestamps = false; // vì bạn không có created_at, updated_at mặc định Laravel
+    protected $table = 'Users';
+    protected $primaryKey = 'UserID';
+    public $timestamps = false;
 
     protected $fillable = [
         'Username',
@@ -22,6 +21,7 @@ class User extends Authenticatable
         'FullName',
         'RoleID',
         'IsActive',
+        'Avatar',
     ];
 
     protected $hidden = [
@@ -34,17 +34,11 @@ class User extends Authenticatable
         'CreatedAt' => 'datetime',
     ];
 
-    /**
-     * Override tên cột password (vì Laravel mặc định dùng 'password')
-     */
     public function getAuthPassword()
     {
         return $this->Password;
     }
 
-    /**
-     * Mối quan hệ với bảng Roles
-     */
     public function role()
     {
         return $this->belongsTo(Role::class, 'RoleID');

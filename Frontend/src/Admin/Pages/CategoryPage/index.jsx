@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
 import CategoryService from "../../../services/categoryService";
+import ConfirmModal from '../../../components/ConfirmModal';
+import ToastMessage from '../../../components/ToastMessage'; // ✅ import toast
 
 const CategoryPage = () => {
     const [categories, setCategories] = useState([]);
@@ -8,27 +10,51 @@ const CategoryPage = () => {
     const [editingId, setEditingId] = useState(null);
     const [editValue, setEditValue] = useState('');
 
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
+
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // ✅ toast state
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+    };
+
     const fetchCategories = async () => {
         try {
             const data = await CategoryService.getAll();
             setCategories(data);
         } catch (error) {
-            console.error('Lỗi khi load loại sản phẩm:', error);
+            showToast('Lỗi khi tải danh sách loại sản phẩm', 'error');
         }
     };
 
     const handleCreate = async () => {
         if (newCategory.trim()) {
-            await CategoryService.create({ CategoryName: newCategory });
-            setNewCategory('');
-            fetchCategories();
+            try {
+                await CategoryService.create({ CategoryName: newCategory });
+                setNewCategory('');
+                fetchCategories();
+                showToast(' Thêm loại thành công');
+            } catch (error) {
+                showToast(' Lỗi khi thêm loại', 'error');
+            }
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Bạn có chắc muốn xoá loại này?')) {
-            await CategoryService.delete(id);
+    const confirmDelete = (category) => {
+        setCategoryToDelete(category);
+        setShowConfirm(true);
+    };
+
+    const handleDeleteConfirmed = async () => {
+        try {
+            await CategoryService.delete(categoryToDelete.id);
+            setShowConfirm(false);
+            setCategoryToDelete(null);
             fetchCategories();
+            showToast(' Đã xoá loại thành công');
+        } catch (error) {
+            showToast(' Lỗi khi xoá loại', 'error');
         }
     };
 
@@ -39,10 +65,15 @@ const CategoryPage = () => {
 
     const handleUpdate = async () => {
         if (editValue.trim()) {
-            await CategoryService.update(editingId, { CategoryName: editValue });
-            setEditingId(null);
-            setEditValue('');
-            fetchCategories();
+            try {
+                await CategoryService.update(editingId, { CategoryName: editValue });
+                setEditingId(null);
+                setEditValue('');
+                fetchCategories();
+                showToast('Cập nhật loại thành công');
+            } catch (error) {
+                showToast('Lỗi khi cập nhật loại', 'error');
+            }
         }
     };
 
@@ -52,7 +83,7 @@ const CategoryPage = () => {
 
     return (
         <div className="container py-4">
-            <h2 className="mb-4 fw-bold"> Quản lý loại sản phẩm</h2>
+            <h2 className="mb-4 fw-bold">Quản lý loại sản phẩm</h2>
 
             {/* Form thêm mới */}
             <div className="input-group mb-4 w-75">
@@ -91,10 +122,16 @@ const CategoryPage = () => {
                             <>
                                 <span className="fw-medium">{cat.name}</span>
                                 <div className="btn-group">
-                                    <button className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" onClick={() => handleEdit(cat.id, cat.name)}>
+                                    <button
+                                        className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+                                        onClick={() => handleEdit(cat.id, cat.name)}
+                                    >
                                         <FaEdit /> Sửa
                                     </button>
-                                    <button className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1" onClick={() => handleDelete(cat.id)}>
+                                    <button
+                                        className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1"
+                                        onClick={() => confirmDelete(cat)}
+                                    >
                                         <FaTrash /> Xoá
                                     </button>
                                 </div>
@@ -103,6 +140,24 @@ const CategoryPage = () => {
                     </li>
                 ))}
             </ul>
+
+            {/* Modal xác nhận xoá */}
+            <ConfirmModal
+                show={showConfirm}
+                title="Xác nhận xoá"
+                message={`Bạn có chắc chắn muốn xoá loại "${categoryToDelete?.name}"?`}
+                onConfirm={handleDeleteConfirmed}
+                onClose={() => setShowConfirm(false)}
+            />
+
+            {/* Hiển thị Toast */}
+            {toast.show && (
+                <ToastMessage
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast({ ...toast, show: false })}
+                />
+            )}
         </div>
     );
 };

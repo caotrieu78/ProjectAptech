@@ -19,11 +19,11 @@ class OrderDetail extends Model
 
     public function order()
     {
-        return $this->belongsTo(Order::class, 'OrderID');
+        return $this->belongsTo(Order::class, 'OrderID', 'OrderID');
     }
 
     public function variant()
     {
-        return $this->belongsTo(ProductVariant::class, 'VariantID');
+        return $this->belongsTo(ProductVariant::class, 'VariantID', 'VariantID');
     }
 }

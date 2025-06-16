@@ -8,19 +8,21 @@ CREATE TABLE Roles (
     RoleName VARCHAR(50) NOT NULL
 );
 
--- Bảng Users (Laravel sử dụng)
+
 CREATE TABLE Users (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
     Username VARCHAR(100) UNIQUE NOT NULL,
     Password VARCHAR(255) NOT NULL,
     Email VARCHAR(100),
     FullName VARCHAR(100),
+    Avatar VARCHAR(255), 
     RoleID INT,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     IsActive BOOLEAN DEFAULT TRUE,
     remember_token VARCHAR(100),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE SET NULL
 );
+
 
 -- Bảng token Sanctum
 CREATE TABLE personal_access_tokens (

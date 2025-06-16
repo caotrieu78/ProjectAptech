@@ -19,11 +19,11 @@ class Order extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'UserID');
+        return $this->belongsTo(User::class, 'UserID', 'UserID');
     }
 
     public function details()
     {
-        return $this->hasMany(OrderDetail::class, 'OrderID');
+        return $this->hasMany(OrderDetail::class, 'OrderID', 'OrderID');
     }
 }
