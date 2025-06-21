@@ -31,7 +31,8 @@ class ProductController extends Controller
             'Description' => 'nullable|string|max:500',
             'Gender' => 'required|in:Male,Female,Unisex',
             'CategoryID' => 'required|exists:ProductCategory,CategoryID',
-            'Thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // ✅ ảnh
+            'Price' => 'nullable|numeric|min:0', // ✅ thêm giá
+            'Thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         if ($request->hasFile('Thumbnail')) {
@@ -57,12 +58,11 @@ class ProductController extends Controller
             'Description' => 'nullable|string|max:500',
             'Gender' => 'in:Male,Female,Unisex',
             'CategoryID' => 'exists:ProductCategory,CategoryID',
+            'Price' => 'nullable|numeric|min:0', // ✅ cập nhật giá
             'Thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        // Xử lý ảnh mới nếu có
         if ($request->hasFile('Thumbnail')) {
-            // Xoá ảnh cũ nếu tồn tại
             if ($product->ThumbnailURL) {
                 $oldPath = public_path(parse_url($product->ThumbnailURL, PHP_URL_PATH));
                 if (File::exists($oldPath)) {
@@ -91,13 +91,9 @@ class ProductController extends Controller
         return response()->json(['message' => 'Đã xoá sản phẩm']);
     }
 
-
     public function __construct()
     {
         // Chỉ cho admin
         $this->middleware('admin')->only(['store', 'update', 'destroy']);
-
-        // Cho user đã login
-        $this->middleware('auth:sanctum')->only(['index', 'show']);
     }
 }

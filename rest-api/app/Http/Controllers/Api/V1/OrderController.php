@@ -16,7 +16,7 @@ class OrderController extends Controller
         $this->middleware('admin')->only(['destroy', 'adminIndex', 'update']);
     }
 
-    // ✅ Lấy đơn hàng của người dùng hiện tại
+    // Lấy đơn hàng của người dùng hiện tại
     public function index()
     {
         $orders = Order::with([
@@ -31,7 +31,7 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    // ✅ Lấy chi tiết đơn hàng của người dùng hiện tại
+    // Lấy chi tiết đơn hàng của người dùng hiện tại
     public function show($id)
     {
         $order = Order::with([
@@ -49,7 +49,7 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    // ✅ Tạo đơn hàng mới
+    // Tạo đơn hàng mới
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -102,7 +102,7 @@ class OrderController extends Controller
         }
     }
 
-    // ✅ Admin: Lấy tất cả đơn hàng kèm quan hệ đầy đủ
+    // Admin: Lấy tất cả đơn hàng kèm quan hệ đầy đủ
     public function adminIndex()
     {
         $orders = Order::with([
@@ -117,7 +117,7 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    // ✅ Admin: Cập nhật đơn hàng
+    // Admin: Cập nhật đơn hàng
     public function update(Request $request, $id)
     {
         $order = Order::find($id);
@@ -141,7 +141,7 @@ class OrderController extends Controller
         ]);
     }
 
-    // ✅ Admin: Xoá đơn hàng
+    // Admin: Xoá đơn hàng
     public function destroy($id)
     {
         $order = Order::find($id);

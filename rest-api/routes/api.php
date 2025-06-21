@@ -26,21 +26,21 @@ Route::prefix('v1')->group(function () {
     Route::get('/visitor-log/count', [VisitorLogController::class, 'count']);
     Route::get('/visitor-log/online', [VisitorLogController::class, 'onlineUsers']);
 
-    // ✅ Protected routes
+    // ✅ Public view routes (không cần login)
+    Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+    Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+    Route::apiResource('product-variants', ProductVariantController::class)->only(['index', 'show']);
+    Route::apiResource('branches', BranchController::class)->only(['index', 'show']);
+    Route::apiResource('sizes', SizeController::class)->only(['index', 'show']);
+    Route::apiResource('colors', ColorController::class)->only(['index', 'show']);
+
+    // ✅ Protected routes (cần login)
     Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::put('/users/me', [UserController::class, 'updateSelf']);
 
-        // ✅ User-accessible resources
-        Route::apiResource('categories', CategoryController::class);
-        Route::apiResource('products', ProductController::class);
-        Route::apiResource('product-variants', ProductVariantController::class);
-        Route::apiResource('sizes', SizeController::class);
-        Route::apiResource('colors', ColorController::class);
-        Route::apiResource('branches', BranchController::class);
-        Route::middleware(['auth:sanctum', 'admin'])->get('/v1/admin/statistics', [StatisticsController::class, 'index']);
         // ✅ Đơn hàng - user
         Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);
 
@@ -59,20 +59,26 @@ Route::prefix('v1')->group(function () {
             });
 
             // ✅ Quản lý người dùng
-            Route::apiResource('users', UserController::class)->only([
-                'index',
-                'show',
-                'update',
-                'destroy'
-            ]);
+            Route::apiResource('users', UserController::class)->only(['index', 'show', 'update', 'destroy']);
 
-            // ✅ Xoá phản hồi
+            // ✅ Quản lý feedback
             Route::delete('/feedback/{id}', [FeedbackController::class, 'destroy']);
 
             // ✅ Quản lý đơn hàng
             Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
             Route::put('/orders/{id}', [OrderController::class, 'update']);
             Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
+
+            // ✅ Admin quản lý categories, products, v.v.
+            Route::apiResource('categories', CategoryController::class)->only(['store', 'update', 'destroy']);
+            Route::apiResource('products', ProductController::class)->only(['store', 'update', 'destroy']);
+            Route::apiResource('product-variants', ProductVariantController::class)->only(['store', 'update', 'destroy']);
+            Route::apiResource('branches', BranchController::class)->only(['store', 'update', 'destroy']);
+            Route::apiResource('sizes', SizeController::class)->only(['store', 'update', 'destroy']);
+            Route::apiResource('colors', ColorController::class)->only(['store', 'update', 'destroy']);
+
+            // ✅ Thống kê
+            Route::get('/admin/statistics', [StatisticsController::class, 'index']);
         });
     });
 });

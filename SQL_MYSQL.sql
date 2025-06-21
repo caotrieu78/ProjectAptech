@@ -10,7 +10,7 @@ CREATE TABLE Roles (
 
 
 CREATE TABLE Users (
-    UserID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID CHAR(255) PRIMARY KEY,
     Username VARCHAR(100) UNIQUE NOT NULL,
     Password VARCHAR(255) NOT NULL,
     Email VARCHAR(100),
@@ -22,7 +22,6 @@ CREATE TABLE Users (
     remember_token VARCHAR(100),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE SET NULL
 );
-
 
 -- Bảng token Sanctum
 CREATE TABLE personal_access_tokens (
@@ -53,6 +52,7 @@ CREATE TABLE Product (
     Gender ENUM('Male', 'Female', 'Unisex'),
     CategoryID INT,
     ThumbnailURL VARCHAR(300),
+    Price DECIMAL(10,2), -- Thêm cột này để lưu giá chung của sản phẩm
     FOREIGN KEY (CategoryID) REFERENCES ProductCategory(CategoryID) ON DELETE SET NULL
 );
 
@@ -120,14 +120,14 @@ CREATE TABLE VisitorLog (
     IPAddress VARCHAR(50),
     VisitTime DATETIME DEFAULT CURRENT_TIMESTAMP,
     Location VARCHAR(200),
-    UserID INT NULL,
+    UserID CHAR(255), -- sửa lại kiểu
     FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE SET NULL
 )
 
 -- Bảng đơn hàng
 CREATE TABLE Orders (
     OrderID INT AUTO_INCREMENT PRIMARY KEY,
-    UserID INT,
+    UserID CHAR(255),
     OrderDate DATETIME DEFAULT CURRENT_TIMESTAMP,
     Status VARCHAR(50) DEFAULT 'Pending',
     TotalAmount DECIMAL(10,2),

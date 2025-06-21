@@ -9,13 +9,13 @@ const getAuthHeader = () => {
 };
 
 const BranchService = {
-    // 📌 Lấy danh sách chi nhánh
+
     getAll: async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/branches`, {
                 headers: {
                     Accept: 'application/json',
-                    ...getAuthHeader(),
+
                 },
             });
             return response.data;
@@ -25,11 +25,9 @@ const BranchService = {
         }
     },
 
-    // 📌 Lấy chi tiết chi nhánh theo ID
     getById: async (branchId) => {
         try {
             const response = await axios.get(`${API_BASE_URL}/branches/${branchId}`, {
-                headers: getAuthHeader(),
             });
             return response.data;
         } catch (error) {
@@ -38,7 +36,6 @@ const BranchService = {
         }
     },
 
-    // 📌 Tạo mới chi nhánh (admin)
     create: async (data) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/branches`, data, {
@@ -53,8 +50,6 @@ const BranchService = {
             throw new Error(error.response?.data?.message || 'Không thể tạo chi nhánh');
         }
     },
-
-    // 📌 Cập nhật chi nhánh (admin)
     update: async (branchId, data) => {
         try {
             const response = await axios.put(`${API_BASE_URL}/branches/${branchId}`, data, {
@@ -69,8 +64,6 @@ const BranchService = {
             throw new Error(error.response?.data?.message || 'Không thể cập nhật chi nhánh');
         }
     },
-
-    // 📌 Xoá chi nhánh (admin)
     delete: async (branchId) => {
         try {
             const response = await axios.delete(`${API_BASE_URL}/branches/${branchId}`, {

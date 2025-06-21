@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -25,12 +26,13 @@ class AuthController extends Controller
             'Email.email' => 'Email không hợp lệ',
         ]);
 
-        // Kiểm tra Username tồn tại thủ công
+        // Kiểm tra Username tồn tại
         if (User::where('Username', $request->Username)->exists()) {
             return response()->json(['message' => 'Tên đăng nhập đã tồn tại'], 409);
         }
 
         $user = User::create([
+            'UserID'   => (string) Str::uuid(), // sinh UUID thủ công
             'Username' => $request->Username,
             'Password' => Hash::make($request->Password),
             'Email'    => $request->Email,
@@ -41,7 +43,7 @@ class AuthController extends Controller
         return response()->json(['message' => 'Đăng ký thành công'], 201);
     }
 
-
+    // Đăng nhập
     public function login(Request $request)
     {
         $request->validate([
@@ -70,23 +72,22 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => [
-                'UserID' => $user->UserID,
+                'UserID'   => $user->UserID,
                 'Username' => $user->Username,
-                'Email' => $user->Email,
-                'RoleID' => $user->RoleID
+                'Email'    => $user->Email,
+                'RoleID'   => $user->RoleID
             ]
         ]);
     }
 
-
-    // Đăng xuất (thu hồi token)
+    // Đăng xuất
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Đăng xuất thành công']);
     }
 
-    // Lấy thông tin người dùng đang đăng nhập
+    // Lấy thông tin người dùng hiện tại
     public function me(Request $request)
     {
         return response()->json($request->user());

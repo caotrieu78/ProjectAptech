@@ -78,8 +78,5 @@ class CategoryController extends Controller
     {
         // Chỉ cho admin
         $this->middleware('admin')->only(['store', 'update', 'destroy']);
-
-        // Cho user đã login
-        $this->middleware('auth:sanctum')->only(['index', 'show']);
     }
 }

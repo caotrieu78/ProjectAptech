@@ -18,6 +18,7 @@ class Product extends Model
         'Gender',
         'CategoryID',
         'ThumbnailURL',
+        'Price',
     ];
 
     public function category()

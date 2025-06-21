@@ -1,28 +1,35 @@
-import React from 'react';
 
 const ProductCard = ({ product, onQuickView }) => {
-    const variant = product.SelectedVariant;
-
+    const image = product.ThumbnailURL || 'https://via.placeholder.com/300x300?text=No+Image';
+    const price = parseFloat(product.Price);
     return (
         <div className="col-md-3 mb-4">
-            <div className="card h-100">
-                <img
-                    src={variant?.ImageURL || product.ThumbnailURL || 'https://via.placeholder.com/300x300?text=No+Image'}
-                    className="card-img-top"
-                    alt={product.ProductName}
-                    style={{ objectFit: 'cover', height: 250 }}
-                />
-                <div className="card-body d-flex flex-column">
-                    <h6 className="card-title">{product.ProductName}</h6>
-                    <p className="card-text text-danger fw-bold mb-2">
-                        {variant?.Price ? variant.Price.toLocaleString('vi-VN') + ' đ' : 'Chưa có giá'}
-                    </p>
-                    <button className="btn btn-outline-primary mt-auto" onClick={() => onQuickView(product)}>
+            <div className="product-card">
+                <div className="product-card-image-wrapper">
+                    <img
+                        src={image}
+                        alt={product.ProductName}
+                        className="product-card-img"
+                    />
+                    <button
+                        className="product-card-button"
+                        onClick={() => onQuickView(product)}
+                    >
                         Xem nhanh
                     </button>
                 </div>
+
+                <div className="product-card-body">
+                    <h5 className="product-card-title">{product.ProductName}</h5>
+                    <p className="product-card-price">
+                        <strong>Giá: </strong>
+                        {!isNaN(price) ? price.toLocaleString('vi-VN') + ' ₫' : 'Chưa có'}
+                    </p>
+                </div>
             </div>
+
         </div>
+
     );
 };
 

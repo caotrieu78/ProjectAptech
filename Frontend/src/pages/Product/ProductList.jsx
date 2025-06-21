@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ProductService from '../../services/ProductService';
 import ProductCard from '../../components/ProductCard';
 import ProductFilter from '../../components/ProductFilter';
+import QuickViewModal from '../../components/QuickViewModal';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -103,28 +104,12 @@ const ProductList = () => {
             )}
 
             {selectedProduct && (
-                <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">{selectedProduct.ProductName}</h5>
-                                <button type="button" className="btn-close" onClick={() => setSelectedProduct(null)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <img
-                                    src={selectedProduct.SelectedVariant?.ImageURL || selectedProduct.ThumbnailURL || 'https://via.placeholder.com/600x400?text=No+Image'}
-                                    alt={selectedProduct.ProductName}
-                                    className="img-fluid mb-3"
-                                />
-                                <p>{selectedProduct.Description}</p>
-                                <p><strong>Giới tính:</strong> {selectedProduct.Gender}</p>
-                                <p><strong>Danh mục:</strong> {selectedProduct.category?.CategoryName || 'Không rõ'}</p>
-                                <p><strong>Giá:</strong> {selectedProduct.SelectedVariant?.Price?.toLocaleString('vi-VN')} đ</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <QuickViewModal
+                    product={selectedProduct}
+                    onClose={() => setSelectedProduct(null)}
+                />
             )}
+
         </div>
     );
 };

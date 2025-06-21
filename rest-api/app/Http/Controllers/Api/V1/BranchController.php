@@ -10,8 +10,6 @@ class BranchController extends Controller
 {
     public function __construct()
     {
-        // Người dùng có thể xem
-        $this->middleware('auth:sanctum')->only(['index', 'show']);
         // Admin mới được thêm/sửa/xoá
         $this->middleware('admin')->only(['store', 'update', 'destroy']);
     }

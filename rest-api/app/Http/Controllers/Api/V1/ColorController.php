@@ -10,7 +10,6 @@ class ColorController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:sanctum')->only(['index', 'show']);
         $this->middleware('admin')->only(['store', 'update', 'destroy']);
     }
 

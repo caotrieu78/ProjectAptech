@@ -9,8 +9,8 @@ const ProductModal = ({ show, onClose, onSubmit, initialData }) => {
         Description: '',
         Gender: 'Unisex',
         CategoryID: '',
+        Price: '',
     });
-
     const [imageFile, setImageFile] = useState(null);
     const [existingImage, setExistingImage] = useState('');
 
@@ -41,6 +41,7 @@ const ProductModal = ({ show, onClose, onSubmit, initialData }) => {
                 Description: initialData.Description || '',
                 Gender: initialData.Gender || 'Unisex',
                 CategoryID: initialData.CategoryID || '',
+                Price: initialData.Price || '',
             });
             setExistingImage(initialData.ThumbnailURL || '');
             setImageFile(null);
@@ -73,6 +74,7 @@ const ProductModal = ({ show, onClose, onSubmit, initialData }) => {
         formData.append('Description', form.Description);
         formData.append('Gender', form.Gender);
         formData.append('CategoryID', form.CategoryID);
+        formData.append('Price', form.Price);
         if (imageFile) {
             formData.append('Thumbnail', imageFile);
         }
@@ -150,7 +152,21 @@ const ProductModal = ({ show, onClose, onSubmit, initialData }) => {
                             )}
                         </Col>
                     </Row>
-
+                    <Row className="mb-3">
+                        <Col md={6}>
+                            <Form.Label className="fw-bold text-dark">Giá (VNĐ)</Form.Label>
+                            <Form.Control
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                name="Price"
+                                value={form.Price}
+                                onChange={handleChange}
+                                placeholder="Nhập giá sản phẩm"
+                                required
+                            />
+                        </Col>
+                    </Row>
                     <Row className="mb-3">
                         <Col>
                             <Form.Label className="fw-bold text-dark">Mô tả</Form.Label>

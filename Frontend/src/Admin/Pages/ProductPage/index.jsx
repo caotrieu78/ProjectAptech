@@ -7,7 +7,6 @@ import ProductModal from './ProductModal';
 import ImagePreviewModal from '../../Component/ImagePreviewModal';
 import ProductService from '../../../services/ProductService';
 
-
 const ProductPage = () => {
     const [products, setProducts] = useState([]);
     const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -18,7 +17,7 @@ const ProductPage = () => {
     const [showModal, setShowModal] = useState(false);
     const [editProduct, setEditProduct] = useState(null);
 
-    const [selectedImage, setSelectedImage] = useState(null); // 👁️ ảnh được chọn
+    const [selectedImage, setSelectedImage] = useState(null);
 
     const fetchProducts = async () => {
         try {
@@ -114,6 +113,11 @@ const ProductPage = () => {
                                 <h5 className="mb-1 fw-bold text-primary">
                                     {prod.ProductName || '(Chưa có tên sản phẩm)'}
                                 </h5>
+
+                                <h6 className="mb-1 text-success">
+                                    Giá: {prod.Price ? prod.Price.toLocaleString('vi-VN') + ' ₫' : 'Chưa có'}
+                                </h6>
+
                                 {prod.Description && (
                                     <p className="mb-1 text-muted">{prod.Description}</p>
                                 )}
@@ -144,7 +148,6 @@ const ProductPage = () => {
                 ))}
             </ul>
 
-            {/* Modal xác nhận xoá */}
             <ConfirmModal
                 show={showConfirm}
                 title="Xác nhận xoá sản phẩm"
@@ -153,7 +156,6 @@ const ProductPage = () => {
                 onClose={() => setShowConfirm(false)}
             />
 
-            {/* Modal thêm / sửa sản phẩm */}
             <ProductModal
                 show={showModal}
                 onClose={() => setShowModal(false)}
@@ -161,7 +163,6 @@ const ProductPage = () => {
                 initialData={editProduct}
             />
 
-            {/* Toast thông báo */}
             {toast.show && (
                 <ToastMessage
                     message={toast.message}

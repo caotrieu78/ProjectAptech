@@ -9,12 +9,10 @@ const getAuthHeader = () => {
 };
 
 const ProductVariantService = {
-    // ✅ Lấy tất cả biến thể sản phẩm
+
     getAll: async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/product-variants`, {
-                headers: getAuthHeader(),
-            });
+            const response = await axios.get(`${API_BASE_URL}/product-variants`);
             return response.data;
         } catch (error) {
             console.error('❌ Lỗi lấy danh sách biến thể:', error.response?.data || error.message);
@@ -22,12 +20,10 @@ const ProductVariantService = {
         }
     },
 
-    // ✅ Lấy chi tiết biến thể theo ID
+
     getById: async (variantId) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/product-variants/${variantId}`, {
-                headers: getAuthHeader(),
-            });
+            const response = await axios.get(`${API_BASE_URL}/product-variants/${variantId}`);
             return response.data;
         } catch (error) {
             console.error(`❌ Lỗi lấy biến thể ID ${variantId}:`, error.response?.data || error.message);
@@ -35,12 +31,12 @@ const ProductVariantService = {
         }
     },
 
-    // ✅ Tạo mới biến thể sản phẩm
+
     create: async (formData) => {
         try {
             const response = await axios.post(`${API_BASE_URL}/product-variants`, formData, {
                 headers: {
-                    ...getAuthHeader(), // không cần set Content-Type, axios tự gán
+                    ...getAuthHeader(),
                 },
             });
             return response.data;
@@ -50,7 +46,7 @@ const ProductVariantService = {
         }
     },
 
-    // ✅ Cập nhật biến thể
+
     update: async (variantId, formData) => {
         try {
             const response = await axios.post(
@@ -69,8 +65,6 @@ const ProductVariantService = {
         }
     },
 
-
-    // ✅ Xoá biến thể
     delete: async (variantId) => {
         try {
             const response = await axios.delete(`${API_BASE_URL}/product-variants/${variantId}`, {
