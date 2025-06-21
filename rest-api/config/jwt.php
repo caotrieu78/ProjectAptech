@@ -131,7 +131,7 @@ return [
     |
     */
 
-    'algo' => env('JWT_ALGO', Tymon\JWTAuth\Providers\JWT\Provider::ALGO_HS256),
+    'algo' => env('JWT_ALGO', 'HS256'),
 
     /*
     |--------------------------------------------------------------------------
@@ -141,7 +141,8 @@ return [
     | Specify the required claims that must exist in any token.
     | A TokenInvalidException will be thrown if any of these claims are not
     | present in the payload.
-    |
+
+
     */
 
     'required_claims' => [
