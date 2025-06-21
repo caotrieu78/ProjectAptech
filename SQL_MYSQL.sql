@@ -27,7 +27,7 @@ CREATE TABLE Users (
 CREATE TABLE personal_access_tokens (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     tokenable_type VARCHAR(255) NOT NULL,
-    tokenable_id BIGINT UNSIGNED NOT NULL,
+    tokenable_id CHAR(255)  NOT NULL,
     name VARCHAR(255) NOT NULL,
     token VARCHAR(64) NOT NULL,
     abilities TEXT,
