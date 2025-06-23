@@ -9,6 +9,7 @@ import {
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Navbar, Nav, Button, NavDropdown, Form, FormControl } from 'react-bootstrap';
 import CartPanel from './CartPanel'; // Đảm bảo đường dẫn chính xác
+import { PATHS } from '../constants/paths';
 
 const Header = () => {
     const [user, setUser] = useState(null);
@@ -89,7 +90,7 @@ const Header = () => {
                             </Nav.Link>
                             <Nav.Link as={NavLink} to="/blog">Blog</Nav.Link>
                             <Nav.Link as={NavLink} to="/about">About</Nav.Link>
-                            <Nav.Link as={NavLink} to="/contact">Contact</Nav.Link>
+                            <Nav.Link as={NavLink} to={PATHS.CONTACT}>Contact</Nav.Link>
                         </Nav>
                         <div className="d-none d-lg-flex align-items-center gap-3">
                             <FaSearch role="button" onClick={toggleSearchModal} />

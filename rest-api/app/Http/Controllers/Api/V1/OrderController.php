@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +17,7 @@ class OrderController extends Controller
         $this->middleware('admin')->only(['destroy', 'adminIndex', 'update']);
     }
 
-    // Lấy đơn hàng của người dùng hiện tại
+    // ✅ Lấy danh sách đơn hàng của người dùng hiện tại
     public function index()
     {
         $orders = Order::with([
@@ -31,7 +32,7 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    // Lấy chi tiết đơn hàng của người dùng hiện tại
+    // ✅ Lấy chi tiết đơn hàng
     public function show($id)
     {
         $order = Order::with([
@@ -49,14 +50,15 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    // Tạo đơn hàng mới
+    // ✅ Tạo đơn hàng mới từ giỏ hàng
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'items' => 'required|array|min:1',
-            'items.*.VariantID' => 'required|exists:ProductVariant,VariantID',
-            'items.*.Quantity' => 'required|integer|min:1'
-        ]);
+        $userId = auth()->id();
+        $cartItems = CartItem::with('variant')->where('UserID', $userId)->get();
+
+        if ($cartItems->isEmpty()) {
+            return response()->json(['message' => 'Giỏ hàng đang trống'], 400);
+        }
 
         DB::beginTransaction();
 
@@ -64,28 +66,47 @@ class OrderController extends Controller
             $total = 0;
             $details = [];
 
-            foreach ($validated['items'] as $item) {
-                $variant = \App\Models\ProductVariant::findOrFail($item['VariantID']);
-                $subtotal = $variant->Price * $item['Quantity'];
+            foreach ($cartItems as $item) {
+                $variant = $item->variant;
+
+                if (!$variant) {
+                    throw new \Exception('Không tìm thấy biến thể sản phẩm');
+                }
+
+                // ✅ Kiểm tra tồn kho
+                if ($variant->StockQuantity < $item->Quantity) {
+                    throw new \Exception("Sản phẩm '{$variant->VariantID}' không đủ số lượng trong kho");
+                }
+
+                // ✅ Trừ số lượng trong kho
+                $variant->StockQuantity -= $item->Quantity;
+                $variant->save();
+
+                $subtotal = $variant->Price * $item->Quantity;
                 $total += $subtotal;
 
                 $details[] = [
                     'VariantID' => $variant->VariantID,
-                    'Quantity' => $item['Quantity'],
+                    'Quantity' => $item->Quantity,
                     'Price' => $variant->Price
                 ];
             }
 
+            // ✅ Tạo đơn hàng
             $order = Order::create([
-                'UserID' => auth()->id(),
+                'UserID' => $userId,
                 'TotalAmount' => $total,
                 'Status' => 'Pending'
             ]);
 
+            // ✅ Tạo chi tiết đơn hàng
             foreach ($details as $detail) {
                 $detail['OrderID'] = $order->OrderID;
                 OrderDetail::create($detail);
             }
+
+            // ✅ Xoá giỏ hàng sau khi đặt
+            CartItem::where('UserID', $userId)->delete();
 
             DB::commit();
 
@@ -102,7 +123,7 @@ class OrderController extends Controller
         }
     }
 
-    // Admin: Lấy tất cả đơn hàng kèm quan hệ đầy đủ
+    // ✅ Admin: Lấy tất cả đơn hàng
     public function adminIndex()
     {
         $orders = Order::with([
@@ -117,7 +138,7 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    // Admin: Cập nhật đơn hàng
+    // ✅ Admin: Cập nhật đơn hàng
     public function update(Request $request, $id)
     {
         $order = Order::find($id);
@@ -141,7 +162,7 @@ class OrderController extends Controller
         ]);
     }
 
-    // Admin: Xoá đơn hàng
+    // ✅ Admin: Xoá đơn hàng
     public function destroy($id)
     {
         $order = Order::find($id);

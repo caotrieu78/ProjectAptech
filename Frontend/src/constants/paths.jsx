@@ -11,9 +11,9 @@ const SIZE_PATH = `${DASHBOARD_PATH}/size`;
 const COLOR_PATH = `${DASHBOARD_PATH}/color`;
 const PROFILE_PATH = `${DASHBOARD_PATH}/profiledashboard`;
 export const PATHS = {
-    HOME: '/',
-    LOGIN: '/login',
-    REGISTER: '/register',
+    HOME: "/",
+    LOGIN: "/login",
+    REGISTER: "/register",
     DASHBOARD: DASHBOARD_PATH,
     CATEGORY_DASHBOARD: CATEGORY_PATH,
     PRODUCT_DASHBOARD: PRODUCT_PATH,
@@ -26,4 +26,9 @@ export const PATHS = {
     SIZE_DASHBOARD: SIZE_PATH,
     COLOR_DASHBOARD: COLOR_PATH,
     PROFILE_DASHBOARD: PROFILE_PATH,
+    ABOUT: "/about",
+    CONTACT: "/contact",
+    PRODUCTDETAIL: "/productdetail",
+    CART: "cart",
+    CHECKOUT: "/checkout"
 };

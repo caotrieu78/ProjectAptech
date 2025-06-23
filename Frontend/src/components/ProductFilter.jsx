@@ -1,150 +1,361 @@
-import React, { useState, useEffect } from 'react';
-import CategoryService from '../services/categoryService';
+import React, { useState, useEffect } from "react";
+import { debounce } from "lodash";
+import CategoryService from "../services/categoryService";
+import { Range } from "react-range"; // Thêm thư viện react-range
 
 const ProductFilter = ({ onFilterChange }) => {
     const [showFilter, setShowFilter] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
-
-    const [selectedTag, setSelectedTag] = useState('All');
-    const [selectedGender, setSelectedGender] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [minPrice, setMinPrice] = useState('');
-    const [maxPrice, setMaxPrice] = useState('');
-
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedTag, setSelectedTag] = useState("All");
+    const [selectedGender, setSelectedGender] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [priceRange, setPriceRange] = useState([0, 1000000]); // Slider giá từ 0 đến 1,000,000
+    const [sortBy, setSortBy] = useState("");
     const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const debouncedFilterChange = debounce((filters) => {
+        onFilterChange?.(filters);
+        console.log("Filters sent to parent:", filters); // Debug
+    }, 300);
 
     useEffect(() => {
-        CategoryService.getAll().then(setCategories).catch(console.error);
+        setLoading(true);
+        CategoryService.getAll()
+            .then((data) => {
+                setCategories(data);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error(err);
+                setError("Không thể tải danh mục");
+                setLoading(false);
+            });
     }, []);
 
     useEffect(() => {
-        onFilterChange?.({
+        debouncedFilterChange({
             tag: selectedTag,
             gender: selectedGender,
             category: selectedCategory,
-            minPrice,
-            maxPrice
+            minPrice: priceRange[0],
+            maxPrice: priceRange[1],
+            search: searchQuery,
+            sortBy
         });
-    }, [selectedTag, selectedGender, selectedCategory, minPrice, maxPrice]);
+    }, [
+        selectedTag,
+        selectedGender,
+        selectedCategory,
+        priceRange,
+        searchQuery,
+        sortBy
+    ]);
 
     const toggleFilter = () => {
-        setShowFilter(prev => !prev);
+        setShowFilter((prev) => !prev);
         if (showSearch) setShowSearch(false);
     };
 
     const toggleSearch = () => {
-        setShowSearch(prev => !prev);
+        setShowSearch((prev) => !prev);
         if (showFilter) setShowFilter(false);
     };
 
-    const topFilters = ['All', 'Bán chạy', 'Mới ra mắt'];
-    const genderOptions = ['Nam', 'Nữ', 'Unisex'];
+    const resetFilters = () => {
+        setSelectedTag("All");
+        setSelectedGender("");
+        setSelectedCategory("");
+        setPriceRange([0, 1000000]);
+        setSearchQuery("");
+        setSortBy("");
+    };
+
+    const topFilters = ["All", "Bán chạy", "Mới ra mắt"];
+    const genderOptions = ["Nam", "Nữ", "Unisex"];
+    const sortOptions = [
+        { value: "price-asc", label: "Giá: Thấp đến cao" },
+        { value: "price-desc", label: "Giá: Cao đến thấp" },
+        { value: "newest", label: "Mới nhất" }
+    ];
 
     return (
         <div className="mb-5 position-relative">
-            {/* Top filters */}
-            <div className="d-flex flex-wrap align-items-center justify-content-between mb-3">
-                <div className="d-flex flex-wrap gap-3">
+            <style>
+                {`
+          .art-btn {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+          }
+          .art-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #5f6775, #3f4855);
+          }
+          .art-btn.active {
+            background: linear-gradient(135deg, #00c4cc, #00a3e0);
+            box-shadow: 0 5px 12px rgba(0, 195, 204, 0.3);
+          }
+          .art-badge {
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          }
+          .art-badge.active {
+            background: linear-gradient(135deg, #00c4cc, #00a3e0);
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 195, 204, 0.2);
+          }
+          .art-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          }
+          .search-container {
+            background: #fff;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+          }
+          .search-container:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+          }
+          .search-input {
+            border: none;
+            border-radius: 20px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+            width: 100%;
+            outline: none;
+          }
+          .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.2);
+            background: #f8fafc;
+          }
+          .clear-btn {
+            border-radius: 50%;
+            padding: 4px;
+            transition: all 0.3s ease;
+          }
+          .clear-btn:hover {
+            background: #f87171;
+            color: white;
+          }
+          .filter-container {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+          }
+          .range-track {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+          }
+          .range-thumb {
+            height: 16px;
+            width: 16px;
+            background: linear-gradient(135deg, #00c4cc, #00a3e0);
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+          }
+          .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+          }
+          .form-control:focus, .form-select:focus {
+            border-color: #00a3e0;
+            box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.1);
+          }
+          .reset-btn {
+            border-radius: 20px;
+            padding: 8px 20px;
+            transition: all 0.3s ease;
+          }
+          .reset-btn:hover {
+            background: #f87171;
+            color: white;
+            border-color: #f87171;
+          }
+        `}
+            </style>
+
+            {/* Top filters and buttons */}
+            <div className="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                <div className="d-flex flex-wrap gap-2">
                     {topFilters.map((tag, idx) => (
                         <button
                             key={idx}
                             onClick={() => setSelectedTag(tag)}
-                            className={`btn btn-sm category-btn ${selectedTag === tag ? 'active' : ''}`}
+                            className={`art-btn btn btn-sm ${selectedTag === tag ? "active" : ""
+                                }`}
                         >
                             {tag}
                         </button>
                     ))}
                 </div>
-
                 <div className="d-flex gap-2 mt-3 mt-md-0">
                     <button
-                        className={`btn ${showFilter ? 'btn-dark' : 'btn-outline-dark'} btn-sm d-flex align-items-center gap-1`}
                         onClick={toggleFilter}
+                        className={`art-btn btn btn-sm ${showFilter ? "active" : ""
+                            } d-flex align-items-center gap-1`}
                     >
-                        <i className={`bi ${showFilter ? 'bi-x' : 'bi-filter'}`}></i> Bộ lọc
+                        <i className={`bi ${showFilter ? "bi-x" : "bi-filter"}`}></i>
+                        <span className="d-none d-md-inline ms-1">Bộ lọc</span>
                     </button>
                     <button
-                        className={`btn ${showSearch ? 'btn-dark' : 'btn-outline-dark'} btn-sm d-flex align-items-center gap-1`}
                         onClick={toggleSearch}
+                        className={`art-btn btn btn-sm ${showSearch ? "active" : ""
+                            } d-flex align-items-center gap-1`}
                     >
-                        <i className={`bi ${showSearch ? 'bi-x' : 'bi-search'}`}></i> Tìm kiếm
+                        <i className={`bi ${showSearch ? "bi-x" : "bi-search"}`}></i>
+                        <span className="d-none d-md-inline ms-1">Tìm kiếm</span>
                     </button>
                 </div>
             </div>
 
             {/* Search box */}
             {showSearch && (
-                <div className="bg-light p-3 rounded shadow-sm mb-4">
+                <div className="search-container mb-4">
                     <div className="d-flex align-items-center gap-2">
                         <i className="bi bi-search text-muted"></i>
                         <input
                             type="text"
-                            className="form-control border-0 shadow-none"
+                            className="search-input form-control"
                             placeholder="Tìm kiếm sản phẩm..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
+                        {searchQuery && (
+                            <button
+                                className="clear-btn btn btn-outline-secondary btn-sm"
+                                onClick={() => setSearchQuery("")}
+                            >
+                                <i className="bi bi-x"></i>
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
 
             {/* Dropdown filters */}
             {showFilter && (
-                <div className="bg-light p-4 rounded shadow-sm">
-                    <div className="row gy-4">
-                        {/* Gender filter */}
-                        <div className="col-md-4">
-                            <h6 className="fw-bold mb-3">Giới tính</h6>
-                            <div className="d-flex flex-wrap gap-2">
-                                {genderOptions.map((g, i) => (
-                                    <span
-                                        key={i}
-                                        onClick={() => setSelectedGender(g)}
-                                        className={`badge px-3 py-2 rounded-pill ${selectedGender === g ? 'bg-dark text-white' : 'bg-secondary-subtle text-dark'}`}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        {g}
-                                    </span>
-                                ))}
+                <div className="filter-container">
+                    {loading ? (
+                        <p className="text-muted">Đang tải danh mục...</p>
+                    ) : error ? (
+                        <p className="text-danger">{error}</p>
+                    ) : (
+                        <div className="row gy-4">
+                            {/* Gender filter */}
+                            <div className="col-12 col-md-3">
+                                <h6 className="fw-bold mb-3 text-uppercase">Giới tính</h6>
+                                <div className="d-flex flex-wrap gap-2">
+                                    {genderOptions.map((g, i) => (
+                                        <span
+                                            key={i}
+                                            onClick={() => setSelectedGender(g)}
+                                            className={`art-badge badge ${selectedGender === g ? "active" : "bg-light text-dark"
+                                                }`}
+                                        >
+                                            {g}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Category filter */}
-                        <div className="col-md-4">
-                            <h6 className="fw-bold mb-3">Danh mục</h6>
-                            <div className="d-flex flex-wrap gap-2">
-                                {categories.map((cat, i) => (
-                                    <span
-                                        key={i}
-                                        onClick={() => setSelectedCategory(cat.name)}
-                                        className={`badge px-3 py-2 rounded-pill ${selectedCategory === cat.name ? 'bg-dark text-white' : 'bg-secondary-subtle text-dark'}`}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        {cat.name}
-                                    </span>
-                                ))}
+                            {/* Category filter */}
+                            <div className="col-12 col-md-3">
+                                <h6 className="fw-bold mb-3 text-uppercase">Danh mục</h6>
+                                <div className="d-flex flex-wrap gap-2">
+                                    {categories.map((cat, i) => (
+                                        <span
+                                            key={i}
+                                            onClick={() => setSelectedCategory(cat.name)}
+                                            className={`art-badge badge ${selectedCategory === cat.name
+                                                ? "active"
+                                                : "bg-light text-dark"
+                                                }`}
+                                        >
+                                            {cat.name}
+                                        </span>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Price filter */}
-                        <div className="col-md-4">
-                            <h6 className="fw-bold mb-3">Khoảng giá</h6>
-                            <div className="d-flex gap-2 align-items-center">
-                                <input
-                                    type="number"
-                                    placeholder="Từ"
-                                    className="form-control"
-                                    value={minPrice}
-                                    onChange={(e) => setMinPrice(e.target.value)}
-                                />
-                                <span>-</span>
-                                <input
-                                    type="number"
-                                    placeholder="Đến"
-                                    className="form-control"
-                                    value={maxPrice}
-                                    onChange={(e) => setMaxPrice(e.target.value)}
-                                />
+                            {/* Price filter with slider */}
+                            <div className="col-12 col-md-3">
+                                <h6 className="fw-bold mb-3 text-uppercase">Khoảng giá</h6>
+                                <div className="mb-3">
+                                    <Range
+                                        values={priceRange}
+                                        step={10000}
+                                        min={0}
+                                        max={1000000}
+                                        onChange={(values) => setPriceRange(values)}
+                                        renderTrack={({ props, children }) => (
+                                            <div
+                                                {...props}
+                                                className="range-track"
+                                                style={{ ...props.style, marginBottom: "10px" }}
+                                            >
+                                                {children}
+                                            </div>
+                                        )}
+                                        renderThumb={({ props }) => (
+                                            <div
+                                                {...props}
+                                                className="range-thumb"
+                                                style={{ ...props.style }}
+                                            />
+                                        )}
+                                    />
+                                    <div className="d-flex justify-content-between text-muted">
+                                        <span>{priceRange[0].toLocaleString()}đ</span>
+                                        <span>{priceRange[1].toLocaleString()}đ</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Sort options */}
+                            <div className="col-12 col-md-3">
+                                <h6 className="fw-bold mb-3 text-uppercase">Sắp xếp</h6>
+                                <select
+                                    className="form-select"
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                >
+                                    <option value="">Mặc định</option>
+                                    {sortOptions.map((opt, i) => (
+                                        <option key={i} value={opt.value}>
+                                            {opt.label}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
+                    )}
+                    <div className="mt-4 text-end">
+                        <button
+                            className="reset-btn btn btn-outline-danger btn-sm"
+                            onClick={resetFilters}
+                        >
+                            Đặt lại bộ lọc
+                        </button>
                     </div>
                 </div>
             )}

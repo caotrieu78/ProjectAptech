@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 
 import ConfirmModal from '../../../components/ConfirmModal';
@@ -19,10 +20,16 @@ const ProductPage = () => {
 
     const [selectedImage, setSelectedImage] = useState(null);
 
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentPage = parseInt(searchParams.get('page')) || 1;
+    const perPage = 5;
+    const [totalPages, setTotalPages] = useState(1);
+
     const fetchProducts = async () => {
         try {
-            const data = await ProductService.getAll();
-            setProducts(data);
+            const data = await ProductService.getPaginated(currentPage, perPage);
+            setProducts(data.data);
+            setTotalPages(data.last_page);
         } catch (err) {
             showToast('❌ Lỗi khi tải sản phẩm', 'error');
         }
@@ -30,7 +37,8 @@ const ProductPage = () => {
 
     useEffect(() => {
         fetchProducts();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPage]);
 
     const showToast = (message, type = 'success') => {
         setToast({ show: true, message, type });
@@ -81,6 +89,18 @@ const ProductPage = () => {
 
     const handleImageClick = (url) => {
         setSelectedImage(url);
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setSearchParams({ page: currentPage + 1 });
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setSearchParams({ page: currentPage - 1 });
+        }
     };
 
     return (
@@ -147,6 +167,17 @@ const ProductPage = () => {
                     </li>
                 ))}
             </ul>
+
+            {/* Pagination */}
+            <div className="d-flex justify-content-center align-items-center gap-3 mt-4">
+                <button className="btn btn-outline-secondary" onClick={handlePrevPage} disabled={currentPage === 1}>
+                    Trang trước
+                </button>
+                <span>Trang {currentPage} / {totalPages}</span>
+                <button className="btn btn-outline-secondary" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                    Trang sau
+                </button>
+            </div>
 
             <ConfirmModal
                 show={showConfirm}

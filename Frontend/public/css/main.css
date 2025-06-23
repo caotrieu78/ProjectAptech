@@ -59,23 +59,12 @@
     }
 }
 
-
-
-
-
-
-
-
-
-
-
 .product-card {
     position: relative;
     overflow: hidden;
     transition: box-shadow 0.3s ease;
     cursor: pointer;
 }
-
 
 .product-card-image-wrapper {
     position: relative;
@@ -87,7 +76,6 @@
     height: 400px;
 
     object-fit: cover;
-
 }
 
 .product-card-button {
@@ -106,7 +94,6 @@
     transition: bottom 0.4s ease, opacity 0.4s ease;
     opacity: 0;
 }
-
 
 .product-card:hover .product-card-button {
     bottom: 16px;
@@ -129,4 +116,752 @@
     font-weight: bold;
     color: #333;
     margin: 0;
+}
+
+/* Gradient Header */
+.gradient-header {
+    background: linear-gradient(135deg, #6b48ff, #00ddeb);
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+/* Pulse Animation for Buttons */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Gradient Button */
+.gradient-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    border: none;
+    transition: background 0.3s ease;
+}
+
+.gradient-btn:hover {
+    background: linear-gradient(135deg, #ff8e53, #ff6b6b);
+}
+
+/* Scale Hover Effect */
+.scale-hover {
+    transition: transform 0.2s ease;
+}
+
+.scale-hover:hover {
+    transform: scale(1.1);
+}
+
+/* Slide Animation for Panel */
+.animate-slide-in {
+    transform: translateX(0);
+}
+
+.animate-slide-out {
+    transform: translateX(100%);
+}
+
+/* Quantity Animation */
+.animate-quantity {
+    transition: transform 0.2s ease;
+}
+
+.animate-quantity:hover {
+    transform: scale(1.1);
+}
+
+/* Item Animation */
+.animate-item {
+    opacity: 1;
+}
+
+.animate-item.remove {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Badge Animation */
+.item-badge {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.item-badge:hover {
+    transform: scale(1.2);
+}
+
+.animate-badge {
+    animation: badge-pop 0.3s ease;
+}
+
+@keyframes badge-pop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ProductList css */
+/* Styling tiêu đề Danh sách sản phẩm */
+.product-list-title {
+    font-family: "Lora", serif;
+    /* Font serif hỗ trợ tốt tiếng Việt */
+    font-size: 2.75rem;
+    /* Kích thước chữ lớn, nổi bật */
+    font-weight: 700;
+    /* Độ đậm vừa phải, tạo vẻ mập mạp */
+    color: #000000;
+    /* Màu đen đậm */
+    text-align: center;
+    /* Căn giữa */
+    letter-spacing: 0.08em;
+    /* Khoảng cách chữ rộng, sang trọng */
+    text-transform: uppercase;
+    /* Chữ in hoa */
+    position: relative;
+    padding-bottom: 1rem;
+    margin-bottom: 3rem;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    /* Đổ bóng nhẹ để chữ nổi */
+    transition: transform 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+}
+
+/* Hiệu ứng hover cho tiêu đề */
+.product-list-title:hover {
+    transform: translateY(-3px);
+    /* Nâng nhẹ khi hover */
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    /* Đổ bóng đậm hơn khi hover */
+}
+
+/* Dòng gạch chân động cho tiêu đề */
+.product-list-title::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    /* Chiều dài gạch chân */
+    height: 6px;
+    /* Độ dày nổi bật */
+    background: linear-gradient(90deg,
+            #3b82f6,
+            #60a5fa);
+    /* Gradient xanh dương */
+    border-radius: 3px;
+    transition: width 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+    /* Ánh sáng xanh nhẹ */
+}
+
+.product-list-title:hover::after {
+    width: 160px;
+    /* Mở rộng gạch chân khi hover */
+    box-shadow: 0 0 18px rgba(59, 130, 246, 0.6);
+    /* Ánh sáng xanh mạnh hơn */
+}
+
+/* Pagination styling */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    /* Tăng gap nhẹ để thoáng hơn */
+    margin-top: 2.5rem;
+    padding: 1rem 0;
+}
+
+.page-item {
+    list-style: none;
+}
+
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    /* Kích thước lớn hơn chút cho dễ bấm */
+    height: 40px;
+    border-radius: 12px;
+    /* Bo góc mềm mại */
+    background-color: #ffffff;
+    color: #1f2937;
+    font-size: 1rem;
+    font-weight: 600;
+    /* Chữ đậm hơn, rõ ràng */
+    text-decoration: none;
+    border: 1px solid #d1d5db;
+    /* Viền xám nhạt */
+    transition: all 0.25s ease-in-out;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    /* Đổ bóng nhẹ hơn */
+}
+
+.page-link:hover {
+    background: linear-gradient(135deg,
+            #60a5fa,
+            #2563eb);
+    /* Gradient xanh dương đậm */
+    color: #ffffff;
+    border-color: transparent;
+    transform: translateY(-3px) scale(1.08);
+    /* Hiệu ứng nâng và phóng to */
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.2);
+    /* Đổ bóng nổi bật hơn */
+}
+
+.page-item.active .page-link {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    /* Gradient đậm hơn */
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 6px 14px rgba(30, 64, 175, 0.25);
+    transform: scale(1.08);
+    font-weight: 700;
+}
+
+.page-item.disabled .page-link {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+}
+
+.page-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25);
+    /* Focus ring nổi bật */
+    z-index: 1;
+}
+
+/* Nút Previous/Next */
+.page-link.nav-link {
+    width: auto;
+    padding: 0 1.5rem;
+    /* Padding rộng hơn cho dễ bấm */
+    height: 40px;
+    font-size: 1rem;
+    font-weight: 600;
+    background: linear-gradient(90deg, #f3f4f6, #e5e7eb);
+    /* Gradient nhạt */
+    color: #1f2937;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    transition: all 0.25s ease-in-out;
+}
+
+.page-link.nav-link:hover {
+    background: linear-gradient(90deg, #e5e7eb, #d1d5db);
+    /* Gradient hover */
+    color: #1f2937;
+    border-color: #9ca3af;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+}
+
+.page-link.nav-link:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Responsive cho mobile */
+@media (max-width: 576px) {
+    .product-list-title {
+        font-size: 2rem;
+        /* Thu nhỏ tiêu đề trên mobile */
+        letter-spacing: 0.06em;
+        /* Giảm khoảng cách chữ */
+        margin-bottom: 2rem;
+    }
+
+    .product-list-title::after {
+        width: 80px;
+        /* Gạch chân ngắn hơn */
+        height: 5px;
+    }
+
+    .product-list-title:hover::after {
+        width: 120px;
+        /* Gạch chân mở rộng ít hơn */
+    }
+
+    .pagination {
+        gap: 8px;
+    }
+
+    .page-link {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+
+    .page-link.nav-link {
+        padding: 0 1.2rem;
+        height: 36px;
+    }
+}
+
+/* About css */
+/* Wavy Gradient Background */
+.bg-wave-gradient {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6, #60a5fa, #93c5fd);
+    background-size: 400% 400%;
+    animation: waveFlow 10s ease infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-wave-gradient::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("https://www.transparenttextures.com/patterns/wave.png") repeat;
+    opacity: 0.05;
+    animation: waveRipple 15s linear infinite;
+}
+
+@keyframes waveFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes waveRipple {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+/* Artistic Typography */
+.font-artistic {
+    font-family: "Playfair Display", serif;
+    letter-spacing: 0.08em;
+    position: relative;
+    text-transform: capitalize;
+}
+
+/* Enhanced Text Shine Effect for mờ mờ look */
+h2,
+h3 {
+    position: relative;
+    overflow: visible;
+    color: #ffffff;
+    /* Ensure text is visible */
+}
+
+@keyframes textShine {
+    0% {
+        left: -100%;
+    }
+
+    10% {
+        left: 100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* Text Wave Animation */
+.animate-text-wave {
+    animation: textWave 2.5s ease-in-out infinite alternate;
+    position: relative;
+}
+
+@keyframes textWave {
+    0% {
+        text-shadow: 0 0 10px rgba(96, 165, 250, 0.6),
+            0 0 20px rgba(59, 130, 246, 0.4);
+        transform: translateY(0);
+    }
+
+    100% {
+        text-shadow: 0 0 20px rgba(96, 165, 250, 1),
+            0 0 40px rgba(59, 130, 246, 0.7);
+        transform: translateY(-2px);
+    }
+}
+
+/* Button Effects */
+.animate-button-glow {
+    position: relative;
+    overflow: hidden;
+    animation: buttonPulse 2s ease infinite;
+    border: 2px solid rgba(96, 165, 250, 0.5);
+}
+
+.animate-button-glow::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.7s ease, height 0.7s ease;
+}
+
+.animate-button-glow:hover::before {
+    width: 500px;
+    height: 500px;
+}
+
+@keyframes buttonPulse {
+    0% {
+        box-shadow: 0 0 15px rgba(96, 165, 250, 0.6),
+            0 0 30px rgba(59, 130, 246, 0.3);
+        border-color: rgba(96, 165, 250, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(96, 165, 250, 1), 0 0 50px rgba(59, 130, 246, 0.6);
+        border-color: rgba(96, 165, 250, 1);
+    }
+
+    100% {
+        box-shadow: 0 0 15px rgba(96, 165, 250, 0.6),
+            0 0 30px rgba(59, 130, 246, 0.3);
+        border-color: rgba(96, 165, 250, 0.5);
+    }
+}
+
+/* Gallery Effects */
+.gallery {
+    padding: 5rem 0;
+    background: linear-gradient(180deg,
+            rgba(30, 58, 138, 0.3),
+            rgba(96, 165, 250, 0.1));
+    border-radius: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.gallery-item {
+    perspective: 1200px;
+    position: relative;
+    transition: all 0.4s ease;
+}
+
+.gallery-img {
+    transition: transform 1s ease, filter 0.6s ease;
+    width: 100%;
+    height: 26rem !important;
+    object-fit: cover;
+    border-radius: 1rem;
+}
+
+.gallery-item:hover .gallery-img {
+    transform: scale(1.15) rotateX(5deg);
+    filter: brightness(1.3) drop-shadow(0 0 20px rgba(96, 165, 250, 0.8));
+}
+
+.gallery-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    background: linear-gradient(to top, rgba(30, 58, 138, 0.9), transparent);
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transform: translateY(30px);
+    display: flex;
+    align-items: flex-end;
+    padding: 2rem;
+    border-radius: 1rem;
+}
+
+.gallery-item:hover .gallery-overlay {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gallery-caption {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    transform: translateZ(20px);
+}
+
+/* Wavy Border Effect */
+.gallery-item::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border: 3px solid transparent;
+    border-radius: 1.5rem;
+    background: linear-gradient(45deg,
+            rgba(96, 165, 250, 0.8),
+            rgba(59, 130, 246, 0.8)) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: -1;
+}
+
+.gallery-item:hover::before {
+    opacity: 1;
+    animation: waveBorder 2s linear infinite;
+}
+
+@keyframes waveBorder {
+    0% {
+        border-image: linear-gradient(45deg,
+                rgba(96, 165, 250, 1),
+                rgba(59, 130, 246, 1)) 1;
+    }
+
+    100% {
+        border-image: linear-gradient(405deg,
+                rgba(96, 165, 250, 1),
+                rgba(59, 130, 246, 1)) 1;
+    }
+}
+
+/* Gallery Background */
+.gallery::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("https://www.transparenttextures.com/patterns/wave.png") repeat;
+    background-size: 200px;
+    opacity: 0.08;
+    animation: waveMove 25s linear infinite;
+}
+
+@keyframes waveMove {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .display-4 {
+        font-size: 3rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    .gallery-img {
+        height: 22rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .display-4 {
+        font-size: 2.2rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    .lead {
+        font-size: 1rem;
+    }
+
+    .animate-button-glow {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .gallery-img {
+        height: 18rem !important;
+    }
+}
+
+/* Framer Motion Support */
+[data-motion] {
+    will-change: transform, opacity;
+}
+
+/*Contact css */
+body {
+    font-family: "Roboto", sans-serif;
+    background-color: #f3f4f6;
+}
+
+.hero-section {
+    background-attachment: fixed;
+    transition: background-position 0.1s ease;
+    position: relative;
+    z-index: 0;
+}
+
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 8px;
+}
+
+.card:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-primary {
+    background-color: #1e3a8a;
+    border-color: #1e3a8a;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-primary:hover,
+.btn-primary.active {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    transform: scale(1.05);
+}
+
+.btn-outline-primary {
+    border-color: #f59e0b;
+    color: #f59e0b;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #f59e0b;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.accordion-button {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #f59e0b;
+    color: #fff;
+}
+
+.form-control,
+.form-select {
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 0.2rem rgba(245, 158, 11, 0.25);
+}
+
+.text-primary {
+    color: #1e3a8a !important;
+    position: relative;
+    z-index: 1;
+}
+
+.card-title,
+h3 {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.leaflet-marker-icon {
+    transition: transform 0.3s ease;
+}
+
+.leaflet-marker-icon:hover {
+    transform: scale(1.2);
+}
+
+.leaflet-container {
+    z-index: 0;
+    overflow: hidden;
+}
+
+@keyframes ticker {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        background-attachment: scroll;
+        min-height: 200px;
+    }
+
+    .card,
+    .accordion-item {
+        margin-bottom: 15px;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .map-container {
+        height: 400px !important;
+    }
 }

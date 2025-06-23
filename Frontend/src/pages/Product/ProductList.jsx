@@ -6,77 +6,86 @@ import QuickViewModal from '../../components/QuickViewModal';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
-    const [filteredProducts, setFilteredProducts] = useState([]);
-    const [visibleCount, setVisibleCount] = useState(8);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [perPage] = useState(8);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loading, setLoading] = useState(false);
+    const [filters, setFilters] = useState({});
+
+    const fetchData = async (page) => {
+        try {
+            setLoading(true);
+            const data = await ProductService.getPaginated(page, perPage);
+            const enriched = data.data.map((product) => {
+                if (product.Variants?.length > 0) {
+                    const sorted = [...product.Variants].sort((a, b) => a.Price - b.Price);
+                    return { ...product, SelectedVariant: sorted[0] };
+                }
+                return product;
+            });
+            setProducts(enriched);
+            setTotalPages(data.last_page);
+        } catch (err) {
+            console.error('Lỗi khi tải sản phẩm:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const data = await ProductService.getAll();
-
-                const enriched = data.map((product) => {
-                    if (product.Variants && product.Variants.length > 0) {
-                        const sorted = [...product.Variants].sort((a, b) => a.Price - b.Price);
-                        return {
-                            ...product,
-                            SelectedVariant: sorted[0],
-                        };
-                    }
-                    return product;
-                });
-
-                setProducts(enriched);
-                setFilteredProducts(enriched);
-            } catch (err) {
-                console.error('Lỗi khi tải sản phẩm:', err);
-            }
-        };
-
-        fetchData();
+        fetchData(currentPage);
         window.scrollTo(0, 0);
-    }, []);
+    }, [currentPage]);
 
     const handleFilterChange = (filter) => {
+        setFilters(filter);
+        setCurrentPage(1); // reset về page 1 khi lọc
+    };
+
+    // Apply filters on current page
+    const applyClientFilters = () => {
         let filtered = [...products];
 
-        // Tag
-        if (filter.tag === 'Bán chạy') {
+        if (filters.tag === 'Bán chạy') {
             filtered = filtered.filter(p => p.isBestSeller);
-        } else if (filter.tag === 'Mới ra mắt') {
+        } else if (filters.tag === 'Mới ra mắt') {
             filtered = filtered.filter(p =>
                 new Date(p.createdAt) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
             );
         }
 
-        // Gender
-        if (filter.gender) {
-            filtered = filtered.filter(p => p.Gender === filter.gender);
+        if (filters.gender) {
+            filtered = filtered.filter(p => p.Gender === filters.gender);
         }
 
-        // Category
-        if (filter.category) {
-            filtered = filtered.filter(p => p.category?.CategoryName === filter.category);
+        if (filters.category) {
+            filtered = filtered.filter(p => p.category?.CategoryName === filters.category);
         }
 
-        // Price range (nếu có)
-        if (filter.minPrice || filter.maxPrice) {
+        if (filters.minPrice || filters.maxPrice) {
             filtered = filtered.filter(p => {
                 const price = p.SelectedVariant?.Price || 0;
-                return (!filter.minPrice || price >= parseInt(filter.minPrice)) &&
-                    (!filter.maxPrice || price <= parseInt(filter.maxPrice));
+                return (!filters.minPrice || price >= parseInt(filters.minPrice)) &&
+                    (!filters.maxPrice || price <= parseInt(filters.maxPrice));
             });
         }
 
-        setFilteredProducts(filtered);
+        return filtered;
     };
 
-    const handleLoadMore = () => {
-        setVisibleCount(prev => prev + 4);
-    };
+    const filteredProducts = applyClientFilters();
 
     const handleQuickView = (product) => {
         setSelectedProduct(product);
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
     };
 
     return (
@@ -85,31 +94,45 @@ const ProductList = () => {
 
             <ProductFilter onFilterChange={handleFilterChange} />
 
-            <div className="row">
-                {filteredProducts.slice(0, visibleCount).map(product => (
-                    <ProductCard
-                        key={product.ProductID}
-                        product={product}
-                        onQuickView={handleQuickView}
-                    />
-                ))}
-            </div>
+            {loading ? (
+                <div className="text-center">Đang tải sản phẩm...</div>
+            ) : (
+                <>
+                    <div className="row">
+                        {filteredProducts.map(product => (
+                            <ProductCard
+                                key={product.ProductID}
+                                product={product}
+                                onQuickView={handleQuickView}
+                            />
+                        ))}
+                    </div>
 
-            {visibleCount < filteredProducts.length && (
-                <div className="text-center mt-4">
-                    <button className="btn btn-primary" onClick={handleLoadMore}>
-                        Load More
-                    </button>
-                </div>
+                    <div className="text-center mt-4 d-flex justify-content-center align-items-center gap-3">
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={handlePrevPage}
+                            disabled={currentPage === 1}
+                        >
+                            Trang trước
+                        </button>
+                        <span>Trang {currentPage} / {totalPages}</span>
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={handleNextPage}
+                            disabled={currentPage === totalPages}
+                        >
+                            Trang sau
+                        </button>
+                    </div>
+                </>
             )}
-
             {selectedProduct && (
                 <QuickViewModal
                     product={selectedProduct}
                     onClose={() => setSelectedProduct(null)}
                 />
             )}
-
         </div>
     );
 };

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BranchController;
+use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\ColorController;
 use App\Http\Controllers\Api\V1\ProductController;
@@ -40,7 +41,15 @@ Route::prefix('v1')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::put('/users/me', [UserController::class, 'updateSelf']);
+        // ✅ Giỏ hàng - Cart (dạng chuẩn gọn gàng)
 
+        Route::controller(CartController::class)->prefix('cart')->group(function () {
+            Route::get('/', 'index');
+            Route::post('/', 'store');
+            Route::put('/', 'update');
+            Route::delete('/', 'destroy');
+            Route::delete('/clear', 'clearAll');
+        });
         // ✅ Đơn hàng - user
         Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);
 
