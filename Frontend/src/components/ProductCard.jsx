@@ -18,16 +18,17 @@ const ProductCard = ({ product }) => {
         setIsFavorited(!isFavorited);
         setFavoriteCount((prev) => (isFavorited ? prev - 1 : prev + 1));
         console.log(
-            `Đã ${isFavorited ? "bỏ" : "thêm"} yêu thích ${product.ProductName}`
+            `Added ${isFavorited ? "removed" : "added"} favorite to ${product.ProductName
+            }`
         );
     };
 
     const handleQuickView = () => {
         console.log("ProductID:", product.ProductID); // Debug
         if (product.ProductID) {
-            navigate(`${PATHS.PRODUCTDETAIL}/${product.ProductID}`); // Sử dụng PATHS.PRODUCTDETAIL
+            navigate(`${PATHS.PRODUCTDETAIL}/${product.ProductID}`); // Use PATHS.PRODUCTDETAIL
         } else {
-            console.error("ProductID không tồn tại!");
+            console.error("ProductID does not exist!");
         }
     };
 
@@ -119,7 +120,9 @@ const ProductCard = ({ product }) => {
                             zIndex: 10
                         }}
                         aria-label={
-                            isFavorited ? "Bỏ yêu thích sản phẩm" : "Yêu thích sản phẩm"
+                            isFavorited
+                                ? "Remove product from favorites"
+                                : "Add product to favorites"
                         }
                     >
                         <i
@@ -162,9 +165,9 @@ const ProductCard = ({ product }) => {
                             e.target.style.background = "rgba(255, 255, 255, 0.8)";
                             e.target.style.color = "#333";
                         }}
-                        aria-label="Xem nhanh sản phẩm"
+                        aria-label="Quick view product"
                     >
-                        Xem nhanh
+                        Quick View
                     </button>
                 </div>
 
@@ -233,7 +236,7 @@ const ProductCard = ({ product }) => {
                                     fontSize: "1.1rem"
                                 }}
                             >
-                                Chưa có giá
+                                No price available
                             </span>
                         )}
                     </p>
@@ -275,7 +278,7 @@ const ProductCard = ({ product }) => {
                             textAlign: "center"
                         }}
                     >
-                        {favoriteCount} lượt yêu thích
+                        {favoriteCount} favorites
                     </div>
                 </div>
             </div>

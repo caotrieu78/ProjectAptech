@@ -21,7 +21,7 @@ import MainLayout from "./Layout/MainLayout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
+import { Checkout, OrderConfirmation } from "./pages/Checkout"; // Import cả Checkout và OrderConfirmation
 import AdminRoute from "./routes/AdminRoute";
 import UserRoute from "./routes/UserRoute";
 import GuestRoute from "./routes/GuestRoute";
@@ -33,6 +33,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import ProductDetail from "./pages/Product/ProductDetail";
 import Cart from "./pages/Cart";
+import Shop from "./pages/Shop";
+import Blog from "./pages/Blog";
 
 function App() {
   return (
@@ -43,12 +45,20 @@ function App() {
           <Route path={PATHS.HOME} element={<Home />} />
           <Route path={PATHS.ABOUT} element={<About />} />
           <Route path={PATHS.CONTACT} element={<Contact />} />
+          <Route path={PATHS.BLOG} element={<Blog />} />
           <Route
             path={PATHS.PRODUCTDETAIL + "/:productId"}
             element={<ProductDetail />}
           />
-          <Route path={PATHS.CART} element={<Cart />} />{" "}
-          {/* Thêm tuyến đường giỏ hàng */}
+          <Route path={PATHS.CART} element={<Cart />} />
+          <Route path={PATHS.SHOP} element={<Shop />} />
+          <Route path={PATHS.CHECKOUT} element={<Checkout />} />{" "}
+          {/* Route cho Checkout */}
+          <Route
+            path={PATHS.ORDER_CONFIRMATION}
+            element={<OrderConfirmation />}
+          />{" "}
+          {/* Thêm route cho Order Confirmation */}
           <Route
             path={PATHS.LOGIN}
             element={
@@ -78,7 +88,6 @@ function App() {
         >
           <Route path={PATHS.CATEGORY_DASHBOARD} element={<CategoryPage />} />
           <Route path={PATHS.PRODUCT_DASHBOARD} element={<ProductPage />} />
-
           <Route
             path={PATHS.PRODUCT_V2_DASHBOARD}
             element={<ProductV2Page />}

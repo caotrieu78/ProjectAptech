@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { debounce } from "lodash";
 import CategoryService from "../services/categoryService";
-import { Range } from "react-range"; // Thêm thư viện react-range
+import { Range } from "react-range";
 
 const ProductFilter = ({ onFilterChange }) => {
     const [showFilter, setShowFilter] = useState(false);
@@ -10,7 +10,7 @@ const ProductFilter = ({ onFilterChange }) => {
     const [selectedTag, setSelectedTag] = useState("All");
     const [selectedGender, setSelectedGender] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
-    const [priceRange, setPriceRange] = useState([0, 1000000]); // Slider giá từ 0 đến 1,000,000
+    const [priceRange, setPriceRange] = useState([0, 1000000]);
     const [sortBy, setSortBy] = useState("");
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ const ProductFilter = ({ onFilterChange }) => {
 
     const debouncedFilterChange = debounce((filters) => {
         onFilterChange?.(filters);
-        console.log("Filters sent to parent:", filters); // Debug
+        console.log("Filters sent to parent:", filters);
     }, 300);
 
     useEffect(() => {
@@ -30,7 +30,7 @@ const ProductFilter = ({ onFilterChange }) => {
             })
             .catch((err) => {
                 console.error(err);
-                setError("Không thể tải danh mục");
+                setError("Unable to load categories");
                 setLoading(false);
             });
     }, []);
@@ -73,12 +73,12 @@ const ProductFilter = ({ onFilterChange }) => {
         setSortBy("");
     };
 
-    const topFilters = ["All", "Bán chạy", "Mới ra mắt"];
-    const genderOptions = ["Nam", "Nữ", "Unisex"];
+    const topFilters = ["All", "Best Seller", "New Arrival"];
+    const genderOptions = ["Men", "Women", "Unisex"];
     const sortOptions = [
-        { value: "price-asc", label: "Giá: Thấp đến cao" },
-        { value: "price-desc", label: "Giá: Cao đến thấp" },
-        { value: "newest", label: "Mới nhất" }
+        { value: "price-asc", label: "Price: Low to High" },
+        { value: "price-desc", label: "Price: High to Low" },
+        { value: "newest", label: "Newest" }
     ];
 
     return (
@@ -215,7 +215,7 @@ const ProductFilter = ({ onFilterChange }) => {
                             } d-flex align-items-center gap-1`}
                     >
                         <i className={`bi ${showFilter ? "bi-x" : "bi-filter"}`}></i>
-                        <span className="d-none d-md-inline ms-1">Bộ lọc</span>
+                        <span className="d-none d-md-inline ms-1">Filter</span>
                     </button>
                     <button
                         onClick={toggleSearch}
@@ -223,7 +223,7 @@ const ProductFilter = ({ onFilterChange }) => {
                             } d-flex align-items-center gap-1`}
                     >
                         <i className={`bi ${showSearch ? "bi-x" : "bi-search"}`}></i>
-                        <span className="d-none d-md-inline ms-1">Tìm kiếm</span>
+                        <span className="d-none d-md-inline ms-1">Search</span>
                     </button>
                 </div>
             </div>
@@ -236,7 +236,7 @@ const ProductFilter = ({ onFilterChange }) => {
                         <input
                             type="text"
                             className="search-input form-control"
-                            placeholder="Tìm kiếm sản phẩm..."
+                            placeholder="Search products..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -256,14 +256,14 @@ const ProductFilter = ({ onFilterChange }) => {
             {showFilter && (
                 <div className="filter-container">
                     {loading ? (
-                        <p className="text-muted">Đang tải danh mục...</p>
+                        <p className="text-muted">Loading categories...</p>
                     ) : error ? (
                         <p className="text-danger">{error}</p>
                     ) : (
                         <div className="row gy-4">
                             {/* Gender filter */}
                             <div className="col-12 col-md-3">
-                                <h6 className="fw-bold mb-3 text-uppercase">Giới tính</h6>
+                                <h6 className="fw-bold mb-3 text-uppercase">Gender</h6>
                                 <div className="d-flex flex-wrap gap-2">
                                     {genderOptions.map((g, i) => (
                                         <span
@@ -280,15 +280,15 @@ const ProductFilter = ({ onFilterChange }) => {
 
                             {/* Category filter */}
                             <div className="col-12 col-md-3">
-                                <h6 className="fw-bold mb-3 text-uppercase">Danh mục</h6>
+                                <h6 className="fw-bold mb-3 text-uppercase">Category</h6>
                                 <div className="d-flex flex-wrap gap-2">
                                     {categories.map((cat, i) => (
                                         <span
                                             key={i}
                                             onClick={() => setSelectedCategory(cat.name)}
                                             className={`art-badge badge ${selectedCategory === cat.name
-                                                ? "active"
-                                                : "bg-light text-dark"
+                                                    ? "active"
+                                                    : "bg-light text-dark"
                                                 }`}
                                         >
                                             {cat.name}
@@ -299,7 +299,7 @@ const ProductFilter = ({ onFilterChange }) => {
 
                             {/* Price filter with slider */}
                             <div className="col-12 col-md-3">
-                                <h6 className="fw-bold mb-3 text-uppercase">Khoảng giá</h6>
+                                <h6 className="fw-bold mb-3 text-uppercase">Price Range</h6>
                                 <div className="mb-3">
                                     <Range
                                         values={priceRange}
@@ -325,21 +325,21 @@ const ProductFilter = ({ onFilterChange }) => {
                                         )}
                                     />
                                     <div className="d-flex justify-content-between text-muted">
-                                        <span>{priceRange[0].toLocaleString()}đ</span>
-                                        <span>{priceRange[1].toLocaleString()}đ</span>
+                                        <span>{priceRange[0].toLocaleString()}</span>
+                                        <span>{priceRange[1].toLocaleString()}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Sort options */}
                             <div className="col-12 col-md-3">
-                                <h6 className="fw-bold mb-3 text-uppercase">Sắp xếp</h6>
+                                <h6 className="fw-bold mb-3 text-uppercase">Sort By</h6>
                                 <select
                                     className="form-select"
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
                                 >
-                                    <option value="">Mặc định</option>
+                                    <option value="">Default</option>
                                     {sortOptions.map((opt, i) => (
                                         <option key={i} value={opt.value}>
                                             {opt.label}
@@ -354,7 +354,7 @@ const ProductFilter = ({ onFilterChange }) => {
                             className="reset-btn btn btn-outline-danger btn-sm"
                             onClick={resetFilters}
                         >
-                            Đặt lại bộ lọc
+                            Reset Filters
                         </button>
                     </div>
                 </div>

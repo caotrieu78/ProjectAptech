@@ -1,4 +1,3 @@
-// Contact.js
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,8 +8,8 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import BranchService from "../services/BranchService";
-import FeedbackService from "../services/FeedbackService";
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import FeedbackService from "../services/feedbackService";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 // Fix Leaflet default marker icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -46,11 +45,16 @@ const branchIcon = new L.Icon({
     shadowSize: [41, 41]
 });
 
+const companyAddress = {
+    name: "Main Office",
+    address: "123 ABC Street, District 1, Ho Chi Minh City, Vietnam",
+    position: { lat: 10.776, lng: 106.698 }
+};
 
 const tickerMessages = [
-    "Chào mừng bạn đến với trang liên hệ của chúng tôi!",
-    "Hỗ trợ 24/7, liên hệ ngay để được tư vấn!",
-    "Khám phá các chi nhánh của chúng tôi tại TP.HCM!"
+    "Welcome to our contact page!",
+    "24/7 support, contact us now for assistance!",
+    "Explore our branches in Ho Chi Minh City!"
 ];
 
 const calculateTimeLeft = () => {
@@ -87,7 +91,7 @@ const Contact = () => {
                 const data = await BranchService.getAll();
                 setBranches(data);
             } catch (error) {
-                toast.error("Không thể tải danh sách chi nhánh");
+                toast.error("Unable to load branch list");
             }
         };
         fetchBranches();
@@ -126,11 +130,11 @@ const Contact = () => {
 
     const validateForm = () => {
         const errors = {};
-        if (!formData.name) errors.name = "Vui lòng nhập họ tên";
-        if (!formData.email) errors.email = "Vui lòng nhập email";
+        if (!formData.name) errors.name = "Please enter your name";
+        if (!formData.email) errors.email = "Please enter your email";
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-            errors.email = "Email không hợp lệ";
-        if (!formData.message) errors.message = "Vui lòng nhập nội dung";
+            errors.email = "Invalid email format";
+        if (!formData.message) errors.message = "Please enter your message";
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
@@ -151,12 +155,12 @@ const Contact = () => {
                 Message: formData.message
             };
             await FeedbackService.create(payload);
-            toast.success("Gửi phản hồi thành công!");
+            toast.success("Feedback sent successfully!");
             setFormData({ name: "", email: "", message: "" });
             localStorage.removeItem("contactFormData");
             setFormErrors({});
         } catch (error) {
-            toast.error(error.message || "Có lỗi xảy ra, vui lòng thử lại!");
+            toast.error(error.message || "An error occurred, please try again!");
         } finally {
             setIsSubmitting(false);
         }
@@ -164,7 +168,7 @@ const Contact = () => {
 
     const copyAddress = (address) => {
         navigator.clipboard.writeText(address);
-        toast.success("Đã sao chép địa chỉ!");
+        toast.success("Address copied successfully!");
     };
 
     const toggleTicker = () => setIsTickerPaused(!isTickerPaused);
@@ -175,78 +179,92 @@ const Contact = () => {
         const map = mapRef.current;
         if (map) {
             map.flyTo(position, 16, { animate: true, duration: 1 });
-            toast.info(`Đã chuyển bản đồ đến ${name}`, { autoClose: 2000 });
+            toast.info(`Map moved to ${name}`, { autoClose: 2000 });
         }
     };
 
     const handleFeedbackFromLocation = (position, name) => {
-        const locationInfo = `Phản hồi từ ${name} (Lat: ${position.lat}, Lng: ${position.lng})`;
+        const locationInfo = `Feedback from ${name} (Lat: ${position.lat}, Lon: ${position.lng})`;
         setFormData((prev) => ({
             ...prev,
             message: `${locationInfo}\n${prev.message}`
         }));
-        toast.info(`Đã thêm thông tin địa điểm vào phản hồi: ${name}`, {
+        toast.info(`Location info added to feedback: ${name}`, {
             autoClose: 2000
         });
     };
 
-    const mapComponent = useMemo(() => (
-        <MapContainer
-            center={{ lat: 10.775, lng: 106.7 }} // vị trí mặc định
-            zoom={14}
-            style={{ height: "750px", borderRadius: "8px", boxShadow: "0 4px 8px rgba(0,0,0,0.1)" }}
-            ref={mapRef}
-        >
-            <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            />
-
-            {/* Marker Văn Phòng Chính cố định */}
-            <Marker position={{ lat: 10.776, lng: 106.698 }} icon={mainOfficeIcon}>
-                <Popup>
-                    Văn Phòng Chính
-                    <br />
-                    <button
-                        className="btn btn-primary btn-sm mt-2 w-100"
-                        onClick={() =>
-                            handleFeedbackFromLocation({ lat: 10.776, lng: 106.698 }, "Văn Phòng Chính")
-                        }
-                    >
-                        Gửi Phản Hồi Từ Địa Điểm Này
-                    </button>
-                </Popup>
-            </Marker>
-            {/* Các chi nhánh khác từ API */}
-            {branches.map((branch, index) => (
+    const mapComponent = useMemo(
+        () => (
+            <MapContainer
+                center={companyAddress.position}
+                zoom={14}
+                style={{
+                    height: "750px",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
+                }}
+                ref={mapRef}
+            >
+                <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                />
                 <Marker
-                    key={index}
-                    position={{ lat: branch.Latitude, lng: branch.Longitude }}
-                    icon={branchIcon}
+                    position={companyAddress.position}
+                    icon={
+                        selectedBranch === companyAddress.name ? mainOfficeIcon : branchIcon
+                    }
                 >
                     <Popup>
-                        {branch.BranchName}
+                        {companyAddress.name}
                         <br />
                         <button
                             className="btn btn-primary btn-sm mt-2 w-100"
                             onClick={() =>
                                 handleFeedbackFromLocation(
-                                    { lat: branch.Latitude, lng: branch.Longitude },
-                                    branch.BranchName
+                                    companyAddress.position,
+                                    companyAddress.name
                                 )
                             }
                         >
-                            Gửi Phản Hồi Từ Địa Điểm Này
+                            Send Feedback From This Location
                         </button>
                     </Popup>
                 </Marker>
-            ))}
-        </MapContainer>
-    ), [branches, selectedBranch]);
-
+                {branches.map((branch, index) => (
+                    <Marker
+                        key={index}
+                        position={{ lat: branch.Latitude, lng: branch.Longitude }}
+                        icon={
+                            selectedBranch === branch.BranchName ? mainOfficeIcon : branchIcon
+                        }
+                    >
+                        <Popup>
+                            {branch.BranchName}
+                            <br />
+                            <button
+                                className="btn btn-primary btn-sm mt-2 w-100"
+                                onClick={() =>
+                                    handleFeedbackFromLocation(
+                                        { lat: branch.Latitude, lng: branch.Longitude },
+                                        branch.BranchName
+                                    )
+                                }
+                            >
+                                Send Feedback From This Location
+                            </button>
+                        </Popup>
+                    </Marker>
+                ))}
+            </MapContainer>
+        ),
+        [selectedBranch, branches]
+    );
     return (
-        <div style={{ fontFamily: "'Roboto', sans-serif", backgroundColor: "#F3F4F6" }}>
-
+        <div
+            style={{ fontFamily: "'Roboto', sans-serif", backgroundColor: "#F3F4F6" }}
+        >
             {/* Promotion Banner */}
             <div
                 className="text-center text-white py-3"
@@ -257,19 +275,19 @@ const Contact = () => {
                 }}
             >
                 <p className="mb-0">
-                    🎉 Ưu đãi đặc biệt: Giảm 15% cho đơn hàng hôm nay! ⏳ Còn{" "}
-                    {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+                    🎉 Special Offer: 15% off today’s orders! ⏳ {timeLeft.hours}h{" "}
+                    {timeLeft.minutes}m {timeLeft.seconds}s left
                 </p>
                 <button
                     className="btn btn-light btn-sm mt-1"
                     onClick={() =>
                         setFormData((prev) => ({
                             ...prev,
-                            message: "Tôi muốn đặt hàng với ưu đãi 15%!\n" + prev.message
+                            message: "I want to order with the 15% discount!\n" + prev.message
                         }))
                     }
                 >
-                    Nhận ưu đãi ngay
+                    Claim Offer Now
                 </button>
             </div>
 
@@ -288,11 +306,11 @@ const Contact = () => {
                 <h1 className="display-5 fw-bold mb-3">
                     <TypeAnimation
                         sequence={[
-                            "Liên Hệ Với Chúng Tôi",
+                            "Contact Us",
                             2000,
-                            "Kết Nối Ngay Hôm Nay!",
+                            "Connect Today!",
                             2000,
-                            "Hỗ Trợ 24/7!",
+                            "24/7 Support!",
                             2000
                         ]}
                         wrapper="span"
@@ -301,34 +319,32 @@ const Contact = () => {
                     />
                 </h1>
                 <p className="lead">
-                    Chúng tôi luôn sẵn sàng hỗ trợ bạn với dịch vụ chuyên nghiệp!
+                    We're always ready to assist you with professional service!
                 </p>
                 <p className="text-warning">
-                    Đội ngũ hỗ trợ đang trực tuyến - Gọi ngay +84 912 345 678!
+                    Our support team is online - Call now +84 912 345 678!
                 </p>
             </div>
             <div className="container py-5">
                 <div className="row g-4">
-                    {/* Cột bên trái: Thông tin công ty và bản đồ */}
-                    <div className="col-lg-6">
-                        {/* ... phần hiển thị thông tin công ty như cũ ... */}
-                        {mapComponent}
-                    </div>
+                    {/* Left Column: Company Info and Map */}
+                    <div className="col-lg-6">{mapComponent}</div>
 
-                    {/* Cột bên phải: Chi nhánh và form phản hồi */}
+                    {/* Right Column: Branches and Feedback Form */}
                     <div className="col-lg-6">
-                        <h3 className="text-primary mb-3">Chi Nhánh</h3>
+                        <h3 className="text-primary mb-3">Branches</h3>
                         <div className="card border-0 shadow-sm p-4 mb-4">
                             <div className="mb-3">
-
                                 {branches.map((branch, index) => (
                                     <button
                                         key={index}
                                         className="btn btn-primary me-2 mb-2"
-                                        onClick={() => handleBranchClick(
-                                            { lat: branch.Latitude, lng: branch.Longitude },
-                                            branch.BranchName
-                                        )}
+                                        onClick={() =>
+                                            handleBranchClick(
+                                                { lat: branch.Latitude, lng: branch.Longitude },
+                                                branch.BranchName
+                                            )
+                                        }
                                     >
                                         {branch.BranchName}
                                     </button>
@@ -337,7 +353,10 @@ const Contact = () => {
 
                             <div className="accordion" id="branchesAccordion">
                                 {branches.map((branch, index) => (
-                                    <div key={index} className="accordion-item border-0 shadow-sm mb-2">
+                                    <div
+                                        key={index}
+                                        className="accordion-item border-0 shadow-sm mb-2"
+                                    >
                                         <h2 className="accordion-header" id={`heading${index}`}>
                                             <button
                                                 className="accordion-button collapsed text-primary"
@@ -362,18 +381,22 @@ const Contact = () => {
                                                     {branch.Address}, {branch.City}
                                                     <button
                                                         className="btn btn-link text-primary p-0 ms-2"
-                                                        onClick={() => copyAddress(`${branch.Address}, ${branch.City}`)}
+                                                        onClick={() =>
+                                                            copyAddress(`${branch.Address}, ${branch.City}`)
+                                                        }
                                                     >
                                                         <i className="fas fa-copy"></i>
                                                     </button>
                                                 </p>
                                                 <a
-                                                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${branch.Address}, ${branch.City}`)}`}
+                                                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+                                                        `${branch.Address}, ${branch.City}`
+                                                    )}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="btn btn-outline-primary btn-sm"
                                                 >
-                                                    Tìm Đường
+                                                    Get Directions
                                                 </a>
                                             </div>
                                         </div>
@@ -382,53 +405,73 @@ const Contact = () => {
                             </div>
                         </div>
 
-                        {/* Form phản hồi */}
-                        <h3 className="text-primary mt-4 mb-3">Gửi Phản Hồi</h3>
-                        <form onSubmit={handleSubmit} className="card border-0 shadow-sm p-4">
+                        {/* Feedback Form */}
+                        <h3 className="text-primary mt-4 mb-3">Send Feedback</h3>
+                        <form
+                            onSubmit={handleSubmit}
+                            className="card border-0 shadow-sm p-4"
+                        >
                             <div className="mb-3">
-                                <label className="form-label text-primary">Họ Tên</label>
+                                <label className="form-label text-primary">Name</label>
                                 <input
                                     type="text"
-                                    className={`form-control ${formErrors.name ? "is-invalid" : ""}`}
+                                    className={`form-control ${formErrors.name ? "is-invalid" : ""
+                                        }`}
                                     name="name"
                                     value={formData.name}
                                     onChange={handleInputChange}
                                 />
-                                {formErrors.name && <div className="invalid-feedback">{formErrors.name}</div>}
+                                {formErrors.name && (
+                                    <div className="invalid-feedback">{formErrors.name}</div>
+                                )}
                             </div>
                             <div className="mb-3">
                                 <label className="form-label text-primary">Email</label>
                                 <input
                                     type="email"
-                                    className={`form-control ${formErrors.email ? "is-invalid" : ""}`}
+                                    className={`form-control ${formErrors.email ? "is-invalid" : ""
+                                        }`}
                                     name="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
                                 />
-                                {formErrors.email && <div className="invalid-feedback">{formErrors.email}</div>}
+                                {formErrors.email && (
+                                    <div className="invalid-feedback">{formErrors.email}</div>
+                                )}
                             </div>
                             <div className="mb-3">
-                                <label className="form-label text-primary">Nội Dung</label>
+                                <label className="form-label text-primary">Message</label>
                                 <textarea
                                     rows="4"
-                                    className={`form-control ${formErrors.message ? "is-invalid" : ""}`}
+                                    className={`form-control ${formErrors.message ? "is-invalid" : ""
+                                        }`}
                                     name="message"
                                     value={formData.message}
                                     onChange={handleInputChange}
                                 ></textarea>
-                                {formErrors.message && <div className="invalid-feedback">{formErrors.message}</div>}
+                                {formErrors.message && (
+                                    <div className="invalid-feedback">{formErrors.message}</div>
+                                )}
                             </div>
-                            <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
-                                {isSubmitting ? "Đang gửi..." : "Gửi Phản Hồi"}
+                            <button
+                                type="submit"
+                                className="btn btn-primary w-100"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? "Sending..." : "Send Feedback"}
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            {/* Footer, Ticker và Toast giữ nguyên như cũ */}
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+            <ToastContainer
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+            />
         </div>
     );
 };
+
 export default Contact;

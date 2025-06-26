@@ -10,12 +10,9 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $perPage = $request->query('per_page', 10);
-        $products = Product::with('category')->paginate($perPage);
-
-        return response()->json($products);
+        return response()->json(Product::with('category')->get());
     }
 
     public function show($id)

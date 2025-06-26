@@ -1,132 +1,166 @@
-import React, { useEffect, useState } from 'react';
-import ProductService from '../../services/ProductService';
-import ProductCard from '../../components/ProductCard';
-import ProductFilter from '../../components/ProductFilter';
-import QuickViewModal from '../../components/QuickViewModal';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ProductService from "../../services/ProductService";
+import ProductCard from "../../components/ProductCard";
+import ProductFilter from "../../components/ProductFilter";
+import QuickViewModal from "../../components/QuickViewModal";
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [perPage] = useState(8);
-    const [totalPages, setTotalPages] = useState(1);
-    const [loading, setLoading] = useState(false);
-    const [filters, setFilters] = useState({});
-
-    const fetchData = async (page) => {
-        try {
-            setLoading(true);
-            const data = await ProductService.getPaginated(page, perPage);
-            const enriched = data.data.map((product) => {
-                if (product.Variants?.length > 0) {
-                    const sorted = [...product.Variants].sort((a, b) => a.Price - b.Price);
-                    return { ...product, SelectedVariant: sorted[0] };
-                }
-                return product;
-            });
-            setProducts(enriched);
-            setTotalPages(data.last_page);
-        } catch (err) {
-            console.error('Lỗi khi tải sản phẩm:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const productsPerPage = 4;
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetchData(currentPage);
+        const fetchData = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const data = await ProductService.getAll();
+                console.log("Product data from API:", data); // Debug product data from API
+                const enriched = data.map((product) => {
+                    // Ensure SelectedVariant.Price always has a value
+                    if (product.Variants?.length > 0) {
+                        const sorted = [...product.Variants].sort(
+                            (a, b) => a.Price - b.Price
+                        );
+                        return { ...product, SelectedVariant: sorted[0] };
+                    }
+                    return { ...product, SelectedVariant: { Price: product.Price || 0 } }; // Fallback price
+                });
+                setProducts(enriched);
+                setFilteredProducts(enriched.slice(0, productsPerPage));
+            } catch (err) {
+                setError("Unable to load products. Please try again later.");
+                console.error("Error loading products:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
         window.scrollTo(0, 0);
-    }, [currentPage]);
+    }, []);
 
     const handleFilterChange = (filter) => {
-        setFilters(filter);
-        setCurrentPage(1); // reset về page 1 khi lọc
-    };
-
-    // Apply filters on current page
-    const applyClientFilters = () => {
         let filtered = [...products];
 
-        if (filters.tag === 'Bán chạy') {
-            filtered = filtered.filter(p => p.isBestSeller);
-        } else if (filters.tag === 'Mới ra mắt') {
-            filtered = filtered.filter(p =>
-                new Date(p.createdAt) >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        console.log("Received filters:", filter); // Debug all filters
+
+        // Filter by search query
+        if (filter.search) {
+            filtered = filtered.filter((p) =>
+                p.ProductName?.toLowerCase().includes(filter.search.toLowerCase())
             );
         }
 
-        if (filters.gender) {
-            filtered = filtered.filter(p => p.Gender === filters.gender);
+        // Filter by tag
+        if (filter.tag === "Best Seller") {
+            filtered = filtered.filter((p) => p.isBestSeller === true);
+        } else if (filter.tag === "New Arrival") {
+            filtered = filtered.filter(
+                (p) =>
+                    p.createdAt &&
+                    new Date(p.createdAt) >=
+                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+            );
         }
 
-        if (filters.category) {
-            filtered = filtered.filter(p => p.category?.CategoryName === filters.category);
+        // Filter by gender
+        if (filter.gender) {
+            filtered = filtered.filter((p) => p.Gender === filter.gender);
         }
 
-        if (filters.minPrice || filters.maxPrice) {
-            filtered = filtered.filter(p => {
-                const price = p.SelectedVariant?.Price || 0;
-                return (!filters.minPrice || price >= parseInt(filters.minPrice)) &&
-                    (!filters.maxPrice || price <= parseInt(filters.maxPrice));
+        // Filter by category
+        if (filter.category) {
+            filtered = filtered.filter(
+                (p) => p.category?.CategoryName === filter.category
+            );
+        }
+
+        // Filter by price range
+        if (filter.minPrice || filter.maxPrice) {
+            filtered = filtered.filter((p) => {
+                const price = parseFloat(p.SelectedVariant?.Price) || 0; // Convert to number
+                const minPrice = parseInt(filter.minPrice) || 0;
+                const maxPrice = parseInt(filter.maxPrice) || Infinity;
+                console.log(
+                    `Checking price: ${price}, Min: ${minPrice}, Max: ${maxPrice}`
+                ); // Debug
+                return price >= minPrice && price <= maxPrice;
             });
         }
 
-        return filtered;
-    };
+        // Sort products
+        if (filter.sortBy) {
+            console.log("Sorting by:", filter.sortBy); // Debug
+            filtered.sort((a, b) => {
+                const priceA = parseFloat(a.SelectedVariant?.Price) || 0;
+                const priceB = parseFloat(b.SelectedVariant?.Price) || 0;
+                if (filter.sortBy === "price-asc") {
+                    console.log(`Comparing prices: ${priceA} vs ${priceB}`); // Debug
+                    return priceA - priceB;
+                } else if (filter.sortBy === "price-desc") {
+                    return priceB - priceA;
+                } else if (filter.sortBy === "newest") {
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                }
+                return 0;
+            });
+        }
 
-    const filteredProducts = applyClientFilters();
+        // Temporarily remove limit for testing
+        setFilteredProducts(filtered);
+        console.log("Filtered products:", filtered); // Debug result
+        // If you want to keep the limit of 4 products, use:
+        // setFilteredProducts(filtered.slice(0, productsPerPage));
+    };
 
     const handleQuickView = (product) => {
         setSelectedProduct(product);
     };
 
-    const handlePrevPage = () => {
-        if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    const handleViewMore = () => {
+        navigate("/shop");
     };
 
-    const handleNextPage = () => {
-        if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
-    };
+    if (isLoading) {
+        return <div className="text-center py-5">Loading...</div>;
+    }
+
+    if (error) {
+        return <div className="text-center py-5 text-danger">{error}</div>;
+    }
 
     return (
         <div className="container py-5">
-            <h3 className="mb-4">Danh sách sản phẩm</h3>
-
+            <h3 className="mb-4">Featured Products</h3> {/* Changed to English */}
             <ProductFilter onFilterChange={handleFilterChange} />
-
-            {loading ? (
-                <div className="text-center">Đang tải sản phẩm...</div>
-            ) : (
-                <>
-                    <div className="row">
-                        {filteredProducts.map(product => (
-                            <ProductCard
-                                key={product.ProductID}
-                                product={product}
-                                onQuickView={handleQuickView}
-                            />
-                        ))}
-                    </div>
-
-                    <div className="text-center mt-4 d-flex justify-content-center align-items-center gap-3">
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={handlePrevPage}
-                            disabled={currentPage === 1}
-                        >
-                            Trang trước
-                        </button>
-                        <span>Trang {currentPage} / {totalPages}</span>
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={handleNextPage}
-                            disabled={currentPage === totalPages}
-                        >
-                            Trang sau
-                        </button>
-                    </div>
-                </>
-            )}
+            <div className="row">
+                {filteredProducts.length === 0 ? (
+                    <div className="text-center py-5">No products found.</div>
+                ) : (
+                    filteredProducts.map((product) => (
+                        <ProductCard
+                            key={product.ProductID}
+                            product={product}
+                            onQuickView={handleQuickView}
+                        />
+                    ))
+                )}
+            </div>
+            <div className="text-center mt-5">
+                <button
+                    className="view-more-btn"
+                    onClick={handleViewMore}
+                    aria-label="View more products"
+                >
+                    View More
+                </button>
+            </div>
             {selectedProduct && (
                 <QuickViewModal
                     product={selectedProduct}

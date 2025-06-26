@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
 import ProductCard from "../../src/components/ProductCard";
@@ -7,150 +6,150 @@ import { useNavigate } from "react-router-dom";
 import ProductService from "../services/ProductService";
 
 const FlashSaleSection = ({ onQuickView }) => {
-    const navigate = useNavigate();
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [timeLeft, setTimeLeft] = useState({
-        hours: 0,
-        minutes: 0,
-        seconds: 0
-    });
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
 
-    // Lấy danh sách sản phẩm từ ProductService
-    useEffect(() => {
-        const fetchFlashSaleProducts = async () => {
-            try {
-                setLoading(true);
-                const data = await ProductService.getAll();
-                // Lọc sản phẩm có Discount và giới hạn 6 sản phẩm
-                const flashSaleProducts = data
-                    .filter((p) => p.Discount && p.Discount > 0)
-                    .slice(0, 6)
-                    .map((product) => {
-                        if (product.Variants && product.Variants.length > 0) {
-                            const sorted = [...product.Variants].sort(
-                                (a, b) => a.Price - b.Price
-                            );
-                            return { ...product, SelectedVariant: sorted[0] };
-                        }
-                        return product;
-                    });
-                setProducts(flashSaleProducts);
-            } catch (err) {
-                console.error("Lỗi khi tải sản phẩm Flash Sale:", err);
-            } finally {
-                setLoading(false);
+  // Fetch product list from ProductService
+  useEffect(() => {
+    const fetchFlashSaleProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await ProductService.getAll();
+        // Filter products with Discount and limit to 6 products
+        const flashSaleProducts = data
+          .filter((p) => p.Discount && p.Discount > 0)
+          .slice(0, 6)
+          .map((product) => {
+            if (product.Variants && product.Variants.length > 0) {
+              const sorted = [...product.Variants].sort(
+                (a, b) => a.Price - b.Price
+              );
+              return { ...product, SelectedVariant: sorted[0] };
             }
-        };
-
-        fetchFlashSaleProducts();
-    }, []);
-
-    // Countdown timer
-    useEffect(() => {
-        const endTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 giờ
-        const timer = setInterval(() => {
-            const now = new Date().getTime();
-            const distance = endTime - now;
-
-            if (distance < 0) {
-                clearInterval(timer);
-                setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
-                return;
-            }
-
-            const hours = Math.floor(
-                (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-            );
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            setTimeLeft({ hours, minutes, seconds });
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, []);
-
-    // Cấu hình slider
-    const settings = {
-        dots: true,
-        infinite: products.length > 4,
-        speed: 500,
-        slidesToShow: Math.min(products.length, 4),
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 3000,
-        responsive: [
-            {
-                breakpoint: 1200,
-                settings: { slidesToShow: Math.min(products.length, 3) }
-            },
-            {
-                breakpoint: 992,
-                settings: { slidesToShow: Math.min(products.length, 2) }
-            },
-            { breakpoint: 576, settings: { slidesToShow: 1 } }
-        ]
+            return product;
+          });
+        setProducts(flashSaleProducts);
+      } catch (err) {
+        console.error("Error fetching Flash Sale products:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    return (
-        <section className="flash-sale-section">
-            <div className="flash-sale-overlay"></div>
-            <div className="container">
-                <div className="flash-sale-header">
-                    <h2>Flash Sale</h2>
-                    <div className="countdown-timer">
-                        <div className="timer-unit">
-                            <span className="timer-value">
-                                {timeLeft.hours.toString().padStart(2, "0")}
-                            </span>
-                            <span className="timer-label">Giờ</span>
-                        </div>
-                        <span className="timer-separator">:</span>
-                        <div className="timer-unit">
-                            <span className="timer-value">
-                                {timeLeft.minutes.toString().padStart(2, "0")}
-                            </span>
-                            <span className="timer-label">Phút</span>
-                        </div>
-                        <span className="timer-separator">:</span>
-                        <div className="timer-unit">
-                            <span className="timer-value">
-                                {timeLeft.seconds.toString().padStart(2, "0")}
-                            </span>
-                            <span className="timer-label">Giây</span>
-                        </div>
-                    </div>
-                </div>
+    fetchFlashSaleProducts();
+  }, []);
 
-                {loading ? (
-                    <div className="no-products">Đang tải sản phẩm...</div>
-                ) : products.length === 0 ? (
-                    <div className="no-products">
-                        Hiện tại chưa có sản phẩm Flash Sale nào!
-                    </div>
-                ) : (
-                    <Slider {...settings}>
-                        {products.map((product) => (
-                            <div key={product.ProductID} className="product-slide">
-                                <div className="product-card-wrapper">
-                                    <ProductCard product={product} onQuickView={onQuickView} />
-                                </div>
-                            </div>
-                        ))}
-                    </Slider>
-                )}
+  // Countdown timer
+  useEffect(() => {
+    const endTime = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 hours
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = endTime - now;
 
-                <div className="view-more">
-                    <button
-                        onClick={() => navigate(PATHS.PRODUCTS)}
-                        className="view-more-btn"
-                    >
-                        Xem thêm sản phẩm
-                    </button>
-                </div>
+      if (distance < 0) {
+        clearInterval(timer);
+        setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
+        return;
+      }
+
+      const hours = Math.floor(
+        (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      setTimeLeft({ hours, minutes, seconds });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Slider settings
+  const settings = {
+    dots: true,
+    infinite: products.length > 4,
+    speed: 500,
+    slidesToShow: Math.min(products.length, 4),
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    responsive: [
+      {
+        breakpoint: 1200,
+        settings: { slidesToShow: Math.min(products.length, 3) }
+      },
+      {
+        breakpoint: 992,
+        settings: { slidesToShow: Math.min(products.length, 2) }
+      },
+      { breakpoint: 576, settings: { slidesToShow: 1 } }
+    ]
+  };
+
+  return (
+    <section className="flash-sale-section">
+      <div className="flash-sale-overlay"></div>
+      <div className="container">
+        <div className="flash-sale-header">
+          <h2>Flash Sale</h2>
+          <div className="countdown-timer">
+            <div className="timer-unit">
+              <span className="timer-value">
+                {timeLeft.hours.toString().padStart(2, "0")}
+              </span>
+              <span className="timer-label">Hours</span>
             </div>
+            <span className="timer-separator">:</span>
+            <div className="timer-unit">
+              <span className="timer-value">
+                {timeLeft.minutes.toString().padStart(2, "0")}
+              </span>
+              <span className="timer-label">Minutes</span>
+            </div>
+            <span className="timer-separator">:</span>
+            <div className="timer-unit">
+              <span className="timer-value">
+                {timeLeft.seconds.toString().padStart(2, "0")}
+              </span>
+              <span className="timer-label">Seconds</span>
+            </div>
+          </div>
+        </div>
 
-            <style>{`
+        {loading ? (
+          <div className="no-products">Loading products...</div>
+        ) : products.length === 0 ? (
+          <div className="no-products">
+            No Flash Sale products available at the moment!
+          </div>
+        ) : (
+          <Slider {...settings}>
+            {products.map((product) => (
+              <div key={product.ProductID} className="product-slide">
+                <div className="product-card-wrapper">
+                  <ProductCard product={product} onQuickView={onQuickView} />
+                </div>
+              </div>
+            ))}
+          </Slider>
+        )}
+
+        <div className="view-more">
+          <button
+            onClick={() => navigate(PATHS.PRODUCTS)}
+            className="view-more-btn"
+          >
+            View More Products
+          </button>
+        </div>
+      </div>
+
+      <style>{`
         .flash-sale-section {
           position: relative;
           padding: 60px 0;
@@ -396,8 +395,8 @@ const FlashSaleSection = ({ onQuickView }) => {
           box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
         }
       `}</style>
-        </section>
-    );
+    </section>
+  );
 };
 
 export default FlashSaleSection;

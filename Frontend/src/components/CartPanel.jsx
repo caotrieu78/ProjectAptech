@@ -22,11 +22,11 @@ const CartPanel = ({ isOpen, onClose }) => {
                 setError(null);
                 setRetryCount(0);
             } catch (error) {
-                console.error("Lỗi khi tải giỏ hàng:", error);
+                console.error("Error loading cart:", error);
                 if (retryCount < 3) {
                     setTimeout(() => setRetryCount(retryCount + 1), 2000);
                 } else {
-                    setError("Không thể tải giỏ hàng. Vui lòng thử lại sau.");
+                    setError("Unable to load cart. Please try again later.");
                 }
             } finally {
                 setIsLoading(false);
@@ -50,7 +50,7 @@ const CartPanel = ({ isOpen, onClose }) => {
                 )
             );
         } catch (err) {
-            console.error("Lỗi cập nhật số lượng:", err);
+            console.error("Error updating quantity:", err);
         }
     };
 
@@ -62,9 +62,11 @@ const CartPanel = ({ isOpen, onClose }) => {
     const handleRemoveItem = async () => {
         try {
             await CartService.removeItem(confirmVariantId);
-            setCartItems((prev) => prev.filter((item) => item.variant.VariantID !== confirmVariantId));
+            setCartItems((prev) =>
+                prev.filter((item) => item.variant.VariantID !== confirmVariantId)
+            );
         } catch (err) {
-            console.error("Lỗi xóa sản phẩm:", err);
+            console.error("Error removing item:", err);
         } finally {
             setShowConfirm(false);
             setConfirmVariantId(null);
@@ -79,132 +81,254 @@ const CartPanel = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div
-            className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-flex justify-content-end"
-            style={{ zIndex: 1055 }}
-            onClick={onClose}
-        >
+        <>
+            <style>
+                {`
+          .cart-panel-overlay {
+            z-index: 1055;
+            background-color: rgba(0, 0, 0, 0.6);
+          }
+          .cart-panel {
+            transition: transform 0.3s ease-in-out;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.2);
+          }
+          .cart-panel-header {
+            border-bottom: 2px solid #e9ecef;
+          }
+          .cart-item-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            transition: box-shadow 0.2s;
+          }
+          .cart-item-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          }
+          .cart-item-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+          }
+          .quantity-btn {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-color: #ced4da;
+          }
+          .quantity-btn:hover {
+            background-color: #f8f9fa;
+          }
+          .quantity-span {
+            padding: 6px 16px;
+            font-size: 14px;
+            border-color: #ced4da;
+            background-color: #e9ecef;
+          }
+          .delete-btn {
+            padding: 6px;
+            font-size: 16px;
+            border-color: #dc3545;
+            color: #dc3545;
+          }
+          .delete-btn:hover {
+            background-color: #dc3545;
+            color: white;
+          }
+          .footer-btn {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 6px;
+          }
+          .footer-btn-primary:hover {
+            background-color: #003087;
+            border-color: #003087;
+          }
+          .footer-btn-secondary:hover {
+            background-color: #5a5e61;
+            border-color: #5a5e61;
+            color: white;
+          }
+          .error-alert {
+            border-radius: 8px;
+            font-size: 14px;
+          }
+          .spinner-container {
+            height: 200px;
+          }
+          .empty-cart {
+            padding: 40px 0;
+          }
+        `}
+            </style>
             <div
-                className="bg-white h-100 p-4 col-12 col-md-5 col-lg-4 shadow-lg"
-                style={{ transition: "transform 0.3s ease-in-out" }}
-                onClick={(e) => e.stopPropagation()}
+                className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-end cart-panel-overlay"
+                onClick={onClose}
+                aria-modal="true"
+                role="dialog"
             >
-                <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-                    <h4 className="fw-bold mb-0">Giỏ hàng ({cartItems.length} sản phẩm)</h4>
-                    <FaTimes
-                        role="button"
-                        onClick={onClose}
-                        className="text-dark"
-                        style={{ fontSize: "1.5rem", cursor: "pointer" }}
+                <div
+                    className="bg-white h-100 p-4 col-12 col-md-5 col-lg-4 cart-panel"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="d-flex justify-content-between align-items-center mb-4 pb-2 cart-panel-header">
+                        <h4 className="fw-bold mb-0">Cart ({cartItems.length} items)</h4>
+                        <button
+                            onClick={onClose}
+                            className="text-dark"
+                            aria-label="Close cart"
+                        >
+                            <FaTimes style={{ fontSize: "1.5rem" }} />
+                        </button>
+                    </div>
+
+                    {isLoading ? (
+                        <div className="text-center my-5 spinner-container">
+                            <div className="spinner-border text-primary" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    ) : error ? (
+                        <div className="alert alert-danger d-flex justify-content-between align-items-center mt-3 error-alert">
+                            <span>{error}</span>
+                            <button
+                                className="btn btn-sm btn-danger"
+                                onClick={() => setRetryCount(retryCount + 1)}
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : cartItems.length === 0 ? (
+                        <div className="text-center py-5 empty-cart">
+                            <p className="text-muted mb-3 fs-5">Your cart is empty!</p>
+                            <button
+                                className="btn btn-primary footer-btn"
+                                onClick={() => {
+                                    onClose();
+                                    navigate("/products");
+                                }}
+                            >
+                                Continue Shopping
+                            </button>
+                        </div>
+                    ) : (
+                        <div
+                            className="overflow-auto"
+                            style={{ maxHeight: "calc(100vh - 200px)" }}
+                        >
+                            {cartItems.map((item) => (
+                                <div
+                                    key={item.variant.VariantID}
+                                    className="mb-3 cart-item-card"
+                                >
+                                    <div className="p-3 d-flex align-items-center">
+                                        <img
+                                            src={
+                                                item.variant.ImageURL ||
+                                                "https://via.placeholder.com/80"
+                                            }
+                                            alt={item.variant.product?.ProductName || "Product"}
+                                            className="me-3 cart-item-img"
+                                        />
+                                        <div className="flex-grow-1">
+                                            <h6 className="fw-bold mb-1">
+                                                {item.variant.product?.ProductName || "Unknown Product"}
+                                            </h6>
+                                            <small className="text-muted d-block">
+                                                Size: {item.variant.size?.SizeName || "-"} | Color:{" "}
+                                                {item.variant.color?.ColorName || "-"}
+                                            </small>
+                                            <div className="d-flex align-items-center mt-2">
+                                                <div className="btn-group me-3">
+                                                    <button
+                                                        className="btn btn-outline-secondary quantity-btn"
+                                                        onClick={() =>
+                                                            handleQuantity(
+                                                                item.variant.VariantID,
+                                                                item.Quantity - 1
+                                                            )
+                                                        }
+                                                        disabled={item.Quantity <= 1}
+                                                        aria-label="Decrease quantity"
+                                                    >
+                                                        <FaMinus />
+                                                    </button>
+                                                    <span className="btn btn-outline-secondary quantity-span">
+                                                        {item.Quantity}
+                                                    </span>
+                                                    <button
+                                                        className="btn btn-outline-secondary quantity-btn"
+                                                        onClick={() =>
+                                                            handleQuantity(
+                                                                item.variant.VariantID,
+                                                                item.Quantity + 1
+                                                            )
+                                                        }
+                                                        aria-label="Increase quantity"
+                                                    >
+                                                        <FaPlus />
+                                                    </button>
+                                                </div>
+                                                <span className="text-primary fw-semibold">
+                                                    {(
+                                                        item.Quantity * (item.variant?.Price || 0)
+                                                    ).toLocaleString("en-US")}{" "}
+                                                    $
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            className="btn btn-outline-danger delete-btn"
+                                            onClick={() => confirmRemoveItem(item.variant.VariantID)}
+                                            aria-label="Remove item"
+                                        >
+                                            <FaTrash />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {cartItems.length > 0 && !error && !isLoading && (
+                        <div className="border-top pt-3 mt-3">
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5 className="fw-bold mb-0">Total:</h5>
+                                <h5 className="fw-bold text-primary">
+                                    {total.toLocaleString("en-US")} $
+                                </h5>
+                            </div>
+                            <div className="d-flex gap-2">
+                                <button
+                                    className="btn btn-outline-secondary w-50 footer-btn footer-btn-secondary"
+                                    onClick={() => {
+                                        onClose();
+                                        navigate("/cart");
+                                    }}
+                                >
+                                    View Cart
+                                </button>
+                                <button
+                                    className="btn btn-primary w-50 footer-btn footer-btn-primary"
+                                    onClick={() => {
+                                        onClose();
+                                        navigate("/checkout");
+                                    }}
+                                >
+                                    Checkout
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <ConfirmModal
+                        show={showConfirm}
+                        title="Confirm Removal"
+                        message="Are you sure you want to remove this item from the cart?"
+                        onConfirm={handleRemoveItem}
+                        onClose={() => setShowConfirm(false)}
                     />
                 </div>
-
-                {isLoading ? (
-                    <div className="text-center my-5">
-                        <div className="spinner-border text-primary" role="status">
-                            <span className="visually-hidden">Đang tải...</span>
-                        </div>
-                    </div>
-                ) : error ? (
-                    <div className="alert alert-danger d-flex justify-content-between mt-3">
-                        <span>{error}</span>
-                        <button className="btn btn-sm btn-danger" onClick={() => setRetryCount(retryCount + 1)}>
-                            Thử lại
-                        </button>
-                    </div>
-                ) : cartItems.length === 0 ? (
-                    <div className="text-center py-5">
-                        <p className="text-muted mb-3 fs-5">Giỏ hàng của bạn đang trống!</p>
-                        <button className="btn btn-primary" onClick={() => {
-                            onClose();
-                            navigate("/products");
-                        }}>
-                            Tiếp tục mua sắm
-                        </button>
-                    </div>
-                ) : (
-                    <div className="overflow-auto" style={{ maxHeight: "calc(100vh - 250px)" }}>
-                        {cartItems.map((item) => (
-                            <div key={item.variant.VariantID} className="card mb-3 shadow-sm">
-                                <div className="card-body d-flex align-items-center">
-                                    <img
-                                        src={item.variant.ImageURL || "https://via.placeholder.com/80"}
-                                        alt={item.variant.product?.ProductName || "Sản phẩm"}
-                                        className="rounded me-3"
-                                        style={{ width: "80px", height: "80px", objectFit: "cover" }}
-                                    />
-                                    <div className="flex-grow-1">
-                                        <h6 className="fw-bold mb-1">{item.variant.product?.ProductName || "Sản phẩm không xác định"}</h6>
-                                        <small className="text-muted d-block">
-                                            Size: {item.variant.size?.SizeName || "-"} | Màu: {item.variant.color?.ColorName || "-"}
-                                        </small>
-                                        <div className="d-flex align-items-center mt-2">
-                                            <div className="btn-group me-3">
-                                                <button
-                                                    className="btn btn-outline-secondary btn-sm"
-                                                    onClick={() => handleQuantity(item.variant.VariantID, item.Quantity - 1)}
-                                                    disabled={item.Quantity <= 1}
-                                                >
-                                                    <FaMinus />
-                                                </button>
-                                                <span className="btn btn-outline-secondary btn-sm disabled">
-                                                    {item.Quantity}
-                                                </span>
-                                                <button
-                                                    className="btn btn-outline-secondary btn-sm"
-                                                    onClick={() => handleQuantity(item.variant.VariantID, item.Quantity + 1)}
-                                                >
-                                                    <FaPlus />
-                                                </button>
-                                            </div>
-                                            <span className="text-primary fw-semibold">
-                                                {(item.Quantity * (item.variant?.Price || 0)).toLocaleString("vi-VN")} ₫
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <button
-                                        className="btn btn-outline-danger btn-sm"
-                                        onClick={() => confirmRemoveItem(item.variant.VariantID)}
-                                    >
-                                        <FaTrash />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {cartItems.length > 0 && !error && !isLoading && (
-                    <div className="border-top pt-3 mt-3">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="fw-bold mb-0">Tổng cộng:</h5>
-                            <h5 className="fw-bold text-primary">{total.toLocaleString("vi-VN")} ₫</h5>
-                        </div>
-                        <div className="d-flex gap-2">
-                            <button className="btn btn-outline-secondary w-50" onClick={() => {
-                                onClose();
-                                navigate("/cart");
-                            }}>
-                                Xem giỏ hàng
-                            </button>
-                            <button className="btn btn-primary w-50" onClick={() => {
-                                onClose();
-                                navigate("/checkout");
-                            }}>
-                                Thanh toán
-                            </button>
-                        </div>
-                    </div>
-                )}
-                <ConfirmModal
-                    show={showConfirm}
-                    title="Xác nhận xoá"
-                    message="Bạn có chắc chắn muốn xoá sản phẩm này khỏi giỏ hàng?"
-                    onConfirm={handleRemoveItem}
-                    onClose={() => setShowConfirm(false)}
-                />
             </div>
-        </div>
+        </>
     );
 };
 

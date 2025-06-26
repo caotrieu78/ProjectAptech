@@ -1,3 +1,5 @@
+import ProductDetail from "../pages/Product/ProductDetail";
+
 const DASHBOARD_PATH = "/dashboard";
 const CATEGORY_PATH = `${DASHBOARD_PATH}/category`;
 const PRODUCT_PATH = `${DASHBOARD_PATH}/product`;
@@ -10,6 +12,7 @@ const ORDER_PATH = `${DASHBOARD_PATH}/orders`;
 const SIZE_PATH = `${DASHBOARD_PATH}/size`;
 const COLOR_PATH = `${DASHBOARD_PATH}/color`;
 const PROFILE_PATH = `${DASHBOARD_PATH}/profiledashboard`;
+
 export const PATHS = {
     HOME: "/",
     LOGIN: "/login",
@@ -29,6 +32,9 @@ export const PATHS = {
     ABOUT: "/about",
     CONTACT: "/contact",
     PRODUCTDETAIL: "/productdetail",
-    CART: "cart",
-    CHECKOUT: "/checkout"
+    CART: "/cart",
+    CHECKOUT: "/checkout",
+    ORDER_CONFIRMATION: "/order-confirmation",
+    SHOP: "/shop",
+    BLOG: "blog"
 };

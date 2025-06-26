@@ -37,7 +37,7 @@ const About = () => {
                         animate="visible"
                         variants={textVariants}
                     >
-                        Giới thiệu về Maverick Dresses
+                        About Maverick Dresses
                     </motion.h2>
                     <motion.p
                         className="lead text-white animate-text-wave mb-4"
@@ -46,11 +46,11 @@ const About = () => {
                         variants={textVariants}
                         transition={{ delay: 0.2 }}
                     >
-                        Maverick The Collection™, do C5coder (bao gồm 5 thành viên) sáng
-                        lập, là thương hiệu thời trang đỉnh cao với sứ mệnh truyền cảm hứng
-                        qua phong cách <strong>urban boho</strong>. Chúng tôi mang đến những
-                        bộ đồng phục học sinh thời thượng, giúp các bạn trẻ tỏa sáng với cá
-                        tính riêng.
+                        Maverick The Collection™, founded by C5coder (a team of five
+                        members), is a premier fashion brand with a mission to inspire
+                        through <strong>urban boho</strong> style. We offer trendy school
+                        uniforms that empower young individuals to shine with their unique
+                        personality.
                     </motion.p>
                     <motion.p
                         className="lead text-white animate-text-wave mb-4"
@@ -59,10 +59,10 @@ const About = () => {
                         variants={textVariants}
                         transition={{ delay: 0.4 }}
                     >
-                        Maverick không chỉ là thời trang, mà còn là cộng đồng{" "}
-                        <strong>Mavies</strong> – những nữ doanh nhân đam mê sáng tạo và
-                        thành công. Với 10-20 thiết kế mới ra mắt mỗi hai tuần, chúng tôi
-                        luôn dẫn đầu xu hướng, mang đến sự mới mẻ và phong cách.
+                        Maverick is more than just fashion; it’s a community of{" "}
+                        <strong>Mavies</strong> – passionate women entrepreneurs who embrace
+                        creativity and success. With 10-20 new designs launched every two
+                        weeks, we stay ahead of trends, delivering freshness and style.
                     </motion.p>
                     <motion.p
                         className="lead text-white animate-text-wave mb-5"
@@ -71,10 +71,9 @@ const About = () => {
                         variants={textVariants}
                         transition={{ delay: 0.6 }}
                     >
-                        Tầm nhìn của chúng tôi là tạo nên phong trào (#bossbabes,
-                        #entrepreneurs), nơi phụ nữ cùng nhau chinh phục tự do tài chính và
-                        tự tin. Hãy gia nhập Maverick để hòa mình vào thế giới thời trang
-                        đầy đam mê!
+                        Our vision is to create a movement (#bossbabes, #entrepreneurs)
+                        where women unite to conquer financial freedom and confidence. Join
+                        Maverick to immerse yourself in a world of passionate fashion!
                     </motion.p>
                     <motion.a
                         href="https://www.maverickthecollection.com"
@@ -91,7 +90,7 @@ const About = () => {
                         variants={buttonVariants}
                         transition={{ delay: 0.8 }}
                     >
-                        Khám phá Maverick ngay!
+                        Explore Maverick Now!
                     </motion.a>
                 </section>
 
@@ -103,29 +102,29 @@ const About = () => {
                         animate="visible"
                         variants={textVariants}
                     >
-                        Bộ sưu tập đồng phục học sinh
+                        School Uniform Collection
                     </motion.h3>
                     <div className="row g-4">
                         {[
                             {
                                 src: "https://im.uniqlo.com/global-cms/spa/resdd842be9c6567ab71efc8f7b137d8ce7fr.jpg",
-                                alt: "Đồng phục 1",
-                                caption: "Phong cách hiện đại"
+                                alt: "Uniform 1",
+                                caption: "Modern Style"
                             },
                             {
                                 src: "https://im.uniqlo.com/global-cms/spa/res744719668aab977e2b4a2b1a4e83d32bfr.jpg",
-                                alt: "Đồng phục 2",
-                                caption: "Năng động trẻ trung"
+                                alt: "Uniform 2",
+                                caption: "Youthful Energy"
                             },
                             {
                                 src: "https://im.uniqlo.com/global-cms/spa/res2766b65f16dff5eac978ec51c0892d53fr.jpg",
-                                alt: "Đồng phục 3",
-                                caption: "Tinh tế thanh lịch"
+                                alt: "Uniform 3",
+                                caption: "Elegant Sophistication"
                             },
                             {
                                 src: "https://im.uniqlo.com/global-cms/spa/resa8e48da9dce2586571da18f8556f3506fr.jpg",
-                                alt: "Đồng phục 4",
-                                caption: "Sáng tạo cá tính"
+                                alt: "Uniform 4",
+                                caption: "Creative Individuality"
                             }
                         ].map((item, index) => (
                             <motion.div
