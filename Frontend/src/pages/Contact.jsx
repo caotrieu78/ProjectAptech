@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, {
+    useState,
+    useEffect,
+    useMemo,
+    useCallback,
+    useRef
+} from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { ToastContainer, toast } from "react-toastify";
 import { TypeAnimation } from "react-type-animation";
@@ -8,7 +14,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import BranchService from "../services/BranchService";
-import FeedbackService from "../services/feedbackService";
+import FeedbackService from "../services/FeedbackService";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 // Fix Leaflet default marker icon
@@ -85,27 +91,42 @@ const Contact = () => {
     const [branches, setBranches] = useState([]);
     const mapRef = useRef(null);
 
+    // Fetch branches
     useEffect(() => {
         const fetchBranches = async () => {
             try {
                 const data = await BranchService.getAll();
-                setBranches(data);
+                setBranches(Array.isArray(data) ? data : []);
             } catch (error) {
                 toast.error("Unable to load branch list");
+                console.error("Branch fetch error:", error);
             }
         };
         fetchBranches();
     }, []);
 
+    // Load form data from localStorage
     useEffect(() => {
         const savedData = localStorage.getItem("contactFormData");
-        if (savedData) setFormData(JSON.parse(savedData));
+        if (savedData) {
+            try {
+                setFormData(JSON.parse(savedData));
+            } catch (error) {
+                console.error("Error parsing localStorage data:", error);
+            }
+        }
     }, []);
 
+    // Save form data to localStorage
     useEffect(() => {
-        localStorage.setItem("contactFormData", JSON.stringify(formData));
+        try {
+            localStorage.setItem("contactFormData", JSON.stringify(formData));
+        } catch (error) {
+            console.error("Error saving to localStorage:", error);
+        }
     }, [formData]);
 
+    // Update time and countdown
     useEffect(() => {
         if (!isTickerPaused) {
             const timer = setInterval(() => {
@@ -116,6 +137,7 @@ const Contact = () => {
         }
     }, [isTickerPaused]);
 
+    // Parallax effect for hero section
     useEffect(() => {
         const hero = document.querySelector(".hero-section");
         const handleScroll = () => {
@@ -128,7 +150,7 @@ const Contact = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    const validateForm = () => {
+    const validateForm = useCallback(() => {
         const errors = {};
         if (!formData.name) errors.name = "Please enter your name";
         if (!formData.email) errors.email = "Please enter your email";
@@ -137,43 +159,49 @@ const Contact = () => {
         if (!formData.message) errors.message = "Please enter your message";
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
-    };
+    }, [formData]);
 
-    const handleInputChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-        setFormErrors({ ...formErrors, [e.target.name]: "" });
-    };
+    const handleInputChange = useCallback((e) => {
+        setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+        setFormErrors((prev) => ({ ...prev, [e.target.name]: "" }));
+    }, []);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-        setIsSubmitting(true);
-        try {
-            const payload = {
-                Name: formData.name,
-                Email: formData.email,
-                Message: formData.message
-            };
-            await FeedbackService.create(payload);
-            toast.success("Feedback sent successfully!");
-            setFormData({ name: "", email: "", message: "" });
-            localStorage.removeItem("contactFormData");
-            setFormErrors({});
-        } catch (error) {
-            toast.error(error.message || "An error occurred, please try again!");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    const handleSubmit = useCallback(
+        async (e) => {
+            e.preventDefault();
+            if (!validateForm()) return;
+            setIsSubmitting(true);
+            try {
+                const payload = {
+                    Name: formData.name,
+                    Email: formData.email,
+                    Message: formData.message
+                };
+                await FeedbackService.create(payload);
+                toast.success("Feedback sent successfully!");
+                setFormData({ name: "", email: "", message: "" });
+                localStorage.removeItem("contactFormData");
+                setFormErrors({});
+            } catch (error) {
+                toast.error(error.message || "An error occurred, please try again!");
+            } finally {
+                setIsSubmitting(false);
+            }
+        },
+        [formData, validateForm]
+    );
 
-    const copyAddress = (address) => {
+    const copyAddress = useCallback((address) => {
         navigator.clipboard.writeText(address);
         toast.success("Address copied successfully!");
-    };
+    }, []);
 
-    const toggleTicker = () => setIsTickerPaused(!isTickerPaused);
+    const toggleTicker = useCallback(
+        () => setIsTickerPaused((prev) => !prev),
+        []
+    );
 
-    const handleBranchClick = (position, name) => {
+    const handleBranchClick = useCallback((position, name) => {
         setSelectedLocation(position);
         setSelectedBranch(name);
         const map = mapRef.current;
@@ -181,18 +209,16 @@ const Contact = () => {
             map.flyTo(position, 16, { animate: true, duration: 1 });
             toast.info(`Map moved to ${name}`, { autoClose: 2000 });
         }
-    };
+    }, []);
 
-    const handleFeedbackFromLocation = (position, name) => {
+    const handleFeedbackFromLocation = useCallback((position, name) => {
         const locationInfo = `Feedback from ${name} (Lat: ${position.lat}, Lon: ${position.lng})`;
         setFormData((prev) => ({
             ...prev,
             message: `${locationInfo}\n${prev.message}`
         }));
-        toast.info(`Location info added to feedback: ${name}`, {
-            autoClose: 2000
-        });
-    };
+        toast.info(`Location info added to feedback: ${name}`, { autoClose: 2000 });
+    }, []);
 
     const mapComponent = useMemo(
         () => (
@@ -259,8 +285,21 @@ const Contact = () => {
                 ))}
             </MapContainer>
         ),
-        [selectedBranch, branches]
+        [branches, selectedBranch, handleFeedbackFromLocation]
     );
+
+    const formatDateTime = useCallback(() => {
+        return currentTime.toLocaleString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        });
+    }, [currentTime]);
+
     return (
         <div
             style={{ fontFamily: "'Roboto', sans-serif", backgroundColor: "#F3F4F6" }}
@@ -325,6 +364,7 @@ const Contact = () => {
                     Our support team is online - Call now +84 912 345 678!
                 </p>
             </div>
+
             <div className="container py-5">
                 <div className="row g-4">
                     {/* Left Column: Company Info and Map */}
@@ -350,7 +390,6 @@ const Contact = () => {
                                     </button>
                                 ))}
                             </div>
-
                             <div className="accordion" id="branchesAccordion">
                                 {branches.map((branch, index) => (
                                     <div
@@ -442,13 +481,13 @@ const Contact = () => {
                             <div className="mb-3">
                                 <label className="form-label text-primary">Message</label>
                                 <textarea
-                                    rows="4"
+                                    rows={4}
                                     className={`form-control ${formErrors.message ? "is-invalid" : ""
                                         }`}
                                     name="message"
                                     value={formData.message}
                                     onChange={handleInputChange}
-                                ></textarea>
+                                />
                                 {formErrors.message && (
                                     <div className="invalid-feedback">{formErrors.message}</div>
                                 )}
@@ -465,6 +504,45 @@ const Contact = () => {
                 </div>
             </div>
 
+            {/* Ticker Section */}
+            <div
+                className="text-white py-2"
+                style={{
+                    backgroundColor: "#1E3A8A",
+                    position: "fixed",
+                    bottom: 0,
+                    width: "100%",
+                    zIndex: 1000,
+                    overflow: "hidden",
+                    whiteSpace: "nowrap"
+                }}
+            >
+                <div
+                    style={{
+                        display: "inline-block",
+                        paddingLeft: "100%",
+                        animation: isTickerPaused ? "none" : "ticker 15s linear infinite"
+                    }}
+                >
+                    <span className="me-4">{formatDateTime()}</span>
+                    {tickerMessages.map((msg, index) => (
+                        <span key={index} className="ticker-message">
+                            {msg}
+                        </span>
+                    ))}
+                </div>
+                <button
+                    className="btn btn-sm btn-light position-absolute top-50 end-0 translate-middle-y me-2"
+                    onClick={toggleTicker}
+                >
+                    {isTickerPaused ? (
+                        <i className="fas fa-play"></i>
+                    ) : (
+                        <i className="fas fa-pause"></i>
+                    )}
+                </button>
+            </div>
+
             <ToastContainer
                 position="top-right"
                 autoClose={3000}
@@ -473,5 +551,31 @@ const Contact = () => {
         </div>
     );
 };
+
+// Add CSS for ticker animation and message styling
+const styles = document.createElement("style");
+styles.innerHTML = `
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+  .ticker-message {
+    font-weight: bold;
+    color: #FFD700;
+    font-size: 16px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    transition: filter 0.3s ease;
+    margin-right: 16px;
+  }
+  .ticker-message:hover {
+    filter: brightness(1.2);
+  }
+  .ticker-message:not(:last-child)::after {
+    content: " • ";
+    color: #FFFFFF;
+    margin-left: 16px;
+  }
+`;
+document.head.appendChild(styles);
 
 export default Contact;

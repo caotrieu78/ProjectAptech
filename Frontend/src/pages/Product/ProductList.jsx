@@ -11,7 +11,7 @@ const ProductList = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const productsPerPage = 4;
+    const productsPerPage = 4; // Number of products to display on the homepage
     const navigate = useNavigate();
 
     useEffect(() => {

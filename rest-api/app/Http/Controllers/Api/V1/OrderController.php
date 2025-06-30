@@ -73,12 +73,10 @@ class OrderController extends Controller
                     throw new \Exception('Không tìm thấy biến thể sản phẩm');
                 }
 
-                // ✅ Kiểm tra tồn kho
                 if ($variant->StockQuantity < $item->Quantity) {
                     throw new \Exception("Sản phẩm '{$variant->VariantID}' không đủ số lượng trong kho");
                 }
 
-                // ✅ Trừ số lượng trong kho
                 $variant->StockQuantity -= $item->Quantity;
                 $variant->save();
 
@@ -92,26 +90,23 @@ class OrderController extends Controller
                 ];
             }
 
-            // ✅ Tạo đơn hàng
             $order = Order::create([
                 'UserID' => $userId,
                 'TotalAmount' => $total,
-                'Status' => 'Pending'
+                'Status' => 'Success',
             ]);
 
-            // ✅ Tạo chi tiết đơn hàng
             foreach ($details as $detail) {
                 $detail['OrderID'] = $order->OrderID;
                 OrderDetail::create($detail);
             }
 
-            // ✅ Xoá giỏ hàng sau khi đặt
             CartItem::where('UserID', $userId)->delete();
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Đặt hàng thành công',
+                'message' => 'Đặt hàng và thanh toán thành công',
                 'order' => $order->load('details.variant')
             ], 201);
         } catch (\Exception $e) {

@@ -1,56 +1,41 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { FaTimes, FaPlus, FaMinus, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import CartService from "../services/CartService";
 import ConfirmModal from "./ConfirmModal";
+import Swal from "sweetalert2";
+import { CartContext } from "../context/CartContext";
 
 const CartPanel = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
-    const [cartItems, setCartItems] = useState([]);
-    const [error, setError] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [retryCount, setRetryCount] = useState(0);
+    const {
+        cartItems,
+        fetchCart,
+        updateCartItem,
+        removeFromCart,
+        isLoading,
+        error
+    } = useContext(CartContext);
     const [showConfirm, setShowConfirm] = useState(false);
     const [confirmVariantId, setConfirmVariantId] = useState(null);
 
     useEffect(() => {
-        const fetchCart = async () => {
-            setIsLoading(true);
-            try {
-                const data = await CartService.getAll();
-                setCartItems(data);
-                setError(null);
-                setRetryCount(0);
-            } catch (error) {
-                console.error("Error loading cart:", error);
-                if (retryCount < 3) {
-                    setTimeout(() => setRetryCount(retryCount + 1), 2000);
-                } else {
-                    setError("Unable to load cart. Please try again later.");
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         if (isOpen) {
-            fetchCart();
+            fetchCart(); // Fetch cart data when panel opens
         }
-    }, [isOpen, retryCount]);
+    }, [isOpen, fetchCart]);
 
     const handleQuantity = async (variantId, newQty) => {
         if (newQty < 1) return;
         try {
-            await CartService.updateItem(variantId, newQty);
-            setCartItems((prev) =>
-                prev.map((item) =>
-                    item.variant.VariantID === variantId
-                        ? { ...item, Quantity: newQty }
-                        : item
-                )
-            );
+            await updateCartItem(variantId, newQty);
         } catch (err) {
-            console.error("Error updating quantity:", err);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Unable to update cart quantity!",
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
     };
 
@@ -61,12 +46,15 @@ const CartPanel = ({ isOpen, onClose }) => {
 
     const handleRemoveItem = async () => {
         try {
-            await CartService.removeItem(confirmVariantId);
-            setCartItems((prev) =>
-                prev.filter((item) => item.variant.VariantID !== confirmVariantId)
-            );
+            await removeFromCart(confirmVariantId);
         } catch (err) {
-            console.error("Error removing item:", err);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Unable to remove item from cart!",
+                timer: 2000,
+                showConfirmButton: false
+            });
         } finally {
             setShowConfirm(false);
             setConfirmVariantId(null);
@@ -189,10 +177,7 @@ const CartPanel = ({ isOpen, onClose }) => {
                     ) : error ? (
                         <div className="alert alert-danger d-flex justify-content-between align-items-center mt-3 error-alert">
                             <span>{error}</span>
-                            <button
-                                className="btn btn-sm btn-danger"
-                                onClick={() => setRetryCount(retryCount + 1)}
-                            >
+                            <button className="btn btn-sm btn-danger" onClick={fetchCart}>
                                 Retry
                             </button>
                         </div>

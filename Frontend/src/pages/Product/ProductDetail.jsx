@@ -6,7 +6,6 @@ import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import ProductService from "../../services/ProductService";
-import CartService from "../../services/CartService";
 import { getUser } from "../../services/authService";
 
 // Custom CSS for skeleton loader and hover effects
@@ -140,7 +139,7 @@ const ProductDetail = () => {
 
     // Add to cart handler
     const handleAddToCart = async () => {
-        const user = getUser(); // Check if user is logged in
+        const user = getUser();
         if (!user) {
             Swal.fire({
                 icon: "warning",
@@ -149,7 +148,7 @@ const ProductDetail = () => {
                 timer: 2000,
                 showConfirmButton: false
             });
-            return;
+            return false;
         }
 
         if (!selectedVariant) {
@@ -160,7 +159,7 @@ const ProductDetail = () => {
                 timer: 2000,
                 showConfirmButton: false
             });
-            return;
+            return false;
         }
 
         if (selectedVariant.StockQuantity === 0) {
@@ -171,19 +170,25 @@ const ProductDetail = () => {
                 timer: 2000,
                 showConfirmButton: false
             });
-            return;
+            return false;
         }
 
         try {
-            await CartService.addItem(selectedVariant.VariantID, quantity);
-            addToCart(selectedVariant, quantity);
-            Swal.fire({
+            await addToCart(selectedVariant, quantity);
+            await Swal.fire({
                 icon: "success",
                 title: "Success",
                 text: "Added to cart!",
                 timer: 2000,
                 showConfirmButton: false
             });
+            // Dispatch event with image URL for fly-to-cart animation
+            window.dispatchEvent(
+                new CustomEvent("cartItemAdded", {
+                    detail: { imageUrl: selectedImage }
+                })
+            );
+            return true;
         } catch (err) {
             console.error("Error adding to cart:", err);
             Swal.fire({
@@ -193,12 +198,13 @@ const ProductDetail = () => {
                 timer: 2000,
                 showConfirmButton: false
             });
+            return false;
         }
     };
 
     // Buy now handler
     const handleBuyNow = async () => {
-        const user = getUser(); // Check if user is logged in
+        const user = getUser();
         if (!user) {
             Swal.fire({
                 icon: "warning",
@@ -210,9 +216,9 @@ const ProductDetail = () => {
             return;
         }
 
-        await handleAddToCart(); // Call handleAddToCart to add to cart
-        if (selectedVariant && selectedVariant.StockQuantity > 0) {
-            navigate("/checkout"); // Navigate to checkout if successful
+        const success = await handleAddToCart();
+        if (success) {
+            navigate("/checkout");
         }
     };
 
@@ -308,7 +314,7 @@ const ProductDetail = () => {
                                         <img
                                             src={selectedImage}
                                             alt={product.ProductName}
-                                            className="d-block w-100 rounded-3 shadow"
+                                            className="d-block w-100 rounded-3 shadow product-image"
                                             style={{ height: "500px", objectFit: "contain" }}
                                             loading="lazy"
                                         />

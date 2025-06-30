@@ -90,7 +90,6 @@ class ProductController extends Controller
         $product->delete();
         return response()->json(['message' => 'Đã xoá sản phẩm']);
     }
-
     public function __construct()
     {
         // Chỉ cho admin

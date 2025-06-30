@@ -16,10 +16,14 @@
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
     "classnames": "^2.5.1",
+    "file-saver": "^2.0.5",
     "fontawesome": "^5.6.3",
     "framer-motion": "^12.18.1",
     "isotope-layout": "^3.0.6",
     "jquery": "^3.7.1",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
+    "leaflet": "^1.9.4",
     "magnific-popup": "^1.2.0",
     "perfect-scrollbar": "^1.5.6",
     "react": "^19.1.0",
@@ -38,7 +42,8 @@
     "recharts": "^2.15.3",
     "select2": "^4.1.0-rc.0",
     "slick-carousel": "^1.8.1",
-    "sweetalert2": "^11.22.0"
+    "sweetalert2": "^11.22.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

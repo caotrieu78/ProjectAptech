@@ -86,7 +86,10 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('colors', ColorController::class)->only(['store', 'update', 'destroy']);
 
             // ✅ Thống kê
-            Route::get('/admin/statistics', [StatisticsController::class, 'index']);
+            Route::get('/admin/statistics/overview', [StatisticsController::class, 'overview']);
+            Route::get('/admin/statistics/monthly', [StatisticsController::class, 'monthly']);
+            Route::get('/admin/statistics/top-products', [StatisticsController::class, 'topProducts']);
+            Route::get('/admin/statistics/top-customers', [StatisticsController::class, 'topCustomers']);
         });
     });
 });

@@ -51,7 +51,6 @@ class ColorController extends Controller
         $color->update($validated);
         return response()->json($color);
     }
-
     public function destroy($id)
     {
         $color = Color::find($id);

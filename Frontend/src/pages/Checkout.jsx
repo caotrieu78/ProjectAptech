@@ -1,13 +1,15 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PATHS } from "../constants/paths";
 import CartService from "../services/CartService";
 import OrderService from "../services/orderService";
 import { FaCheckCircle } from "react-icons/fa";
+import { CartContext } from "../context/CartContext";
 
 const Checkout = () => {
     const navigate = useNavigate();
     const { state } = useLocation();
+    const { clearCart } = useContext(CartContext); // Lấy clearCart từ CartContext
     const {
         cartItems: initialCartItems = [],
         voucherCode = "",
@@ -162,8 +164,8 @@ const Checkout = () => {
                 promoDiscount
             };
             const response = await OrderService.create(orderData);
-            await CartService.clearCart();
-            setCartItems([]);
+            await clearCart(); // Gọi clearCart từ CartContext
+            setCartItems([]); // Cập nhật state cục bộ
             setToast({
                 show: true,
                 message: "Order placed successfully!",

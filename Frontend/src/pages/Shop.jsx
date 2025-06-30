@@ -258,7 +258,7 @@ const Shop = () => {
         [addToCart]
     );
 
-    // Pagination calculations
+    // Pagination
     const indexOfLastProduct = currentPage * productsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
     const currentProducts = filteredProducts.slice(
@@ -277,7 +277,7 @@ const Shop = () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    // Skeleton Loader component
+    // Skeleton Loader
     const SkeletonLoader = () => (
         <div className="row g-4">
             {[...Array(productsPerPage)].map((_, index) => (
@@ -320,9 +320,11 @@ const Shop = () => {
                             ))}
                         </div>
 
-                        {/* Pagination Component */}
                         {totalPages > 1 && (
-                            <nav className="d-flex justify-content-center mt-5" aria-label="Product Pagination">
+                            <nav
+                                className="d-flex justify-content-center mt-5"
+                                aria-label="Product Pagination"
+                            >
                                 <ul className="pagination">
                                     <li className="page-item">
                                         <button
@@ -334,38 +336,20 @@ const Shop = () => {
                                             « Previous
                                         </button>
                                     </li>
-
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                        .filter(
-                                            (pageNum) =>
-                                                pageNum === 1 ||
-                                                pageNum === totalPages ||
-                                                Math.abs(currentPage - pageNum) <= 2
-                                        )
-                                        .map((pageNum, index, array) => {
-                                            const showEllipsis =
-                                                index > 0 && pageNum !== array[index - 1] + 1;
-
-                                            return (
-                                                <React.Fragment key={pageNum}>
-                                                    {showEllipsis && (
-                                                        <li className="page-item disabled">
-                                                            <span className="page-link">...</span>
-                                                        </li>
-                                                    )}
-                                                    <li className="page-item">
-                                                        <button
-                                                            className={`page-link pagination-btn ${currentPage === pageNum ? "active" : ""}`}
-                                                            onClick={() => handlePageChange(pageNum)}
-                                                            aria-current={currentPage === pageNum ? "page" : undefined}
-                                                        >
-                                                            {pageNum}
-                                                        </button>
-                                                    </li>
-                                                </React.Fragment>
-                                            );
-                                        })}
-
+                                    {[...Array(totalPages)].map((_, index) => (
+                                        <li key={index} className="page-item">
+                                            <button
+                                                className={`page-link pagination-btn ${currentPage === index + 1 ? "active" : ""
+                                                    }`}
+                                                onClick={() => handlePageChange(index + 1)}
+                                                aria-current={
+                                                    currentPage === index + 1 ? "page" : undefined
+                                                }
+                                            >
+                                                {index + 1}
+                                            </button>
+                                        </li>
+                                    ))}
                                     <li className="page-item">
                                         <button
                                             className="page-link pagination-btn"
